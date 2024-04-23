@@ -2,11 +2,11 @@ import React from 'react';
 import Navbar from './Navbar.js'; // Import the Navbar component
 import 'bootstrap/dist/css/bootstrap.min.css';
 import myImage from './placeholder.png';
-import './fonts.css'
+import './utilities.css'
 
-const section1 = () => {
+const MainPage = () => {
   return (
-    <div className="section">
+    <div className="main">
         <Navbar />
         <div className="main">
             <h2>Welcome to Eat the Rich</h2>
@@ -18,4 +18,4 @@ const section1 = () => {
   );
 };
 
-export default section1;
+export default MainPage;

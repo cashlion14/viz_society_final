@@ -2,10 +2,9 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import './Navbar.css';
-import './fonts.css';
-import logo from './logo.png'; // Import your logo image
+import logo from './logo.png';
 
-function BasicExample() {
+function NavBar() {
   return (
     <Navbar expand="lg" className="navbar-custom">
       <Container>
@@ -31,4 +30,4 @@ function BasicExample() {
   );
 }
 
-export default BasicExample;
+export default NavBar;

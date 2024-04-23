@@ -12,3 +12,11 @@
     border: 2px solid white;
     border-radius: 5px;
   }
+
+.section {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: black;
+    color: white;
+}

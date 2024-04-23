@@ -1,0 +1,34 @@
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import './Navbar.css';
+import './fonts.css';
+import logo from './logo.png'; // Import your logo image
+
+function BasicExample() {
+  return (
+    <Navbar expand="lg" className="navbar-custom">
+      <Container>
+        <Navbar.Brand href="#visualizations">
+          <img
+            src={logo}
+            width="30"
+            height="30"
+            className="d-inline-block align-top"
+            alt="Logo"
+          />
+        </Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link href="#visualizations"> <h5>Visualizations</h5></Nav.Link>
+            <Nav.Link href="#about"><h5>About</h5></Nav.Link>
+            <Nav.Link href="#data-providence"><h5>Data Providence</h5></Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
+  );
+}
+
+export default BasicExample;

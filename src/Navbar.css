@@ -1,0 +1,33 @@
+.navbar {
+    display: flex;
+    background-color: #000000;
+    color: rgb(255, 255, 255);
+  }
+  
+  .nav-item {
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  
+  .nav-item:hover {
+    background-color: #555;
+  }
+  
+  .active {
+    background-color: #555;
+  }
+  
+
+.navbar-custom {
+  background-color: 090C02;
+  width: 100vw;
+}
+
+.navbar-custom .navbar-nav .nav-link {
+  color: white;
+}
+
+.navbar-custom .navbar-nav .nav-link:hover {
+  color: gray; /* Optional: Change hover color */
+}
+  

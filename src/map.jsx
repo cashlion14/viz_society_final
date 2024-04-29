@@ -22,6 +22,10 @@ export default function Map() {
     const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
     const [selectedYear, setSelectedYear] = useState(2020);
     const boston = {lng: -71.0589, lat: 42.3601};
+    const bostonBounds = [
+        [-71.291421, 42.127797],  // Southwest coordinates
+        [-70.886004, 42.499542]   // Northeast coordinates
+    ];
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
 
     const ethnicityColorMapping = {
@@ -64,8 +68,9 @@ export default function Map() {
             style: maptilersdk.MapStyle.STREETS.DARK,
             center: [boston.lng, boston.lat],
             zoom: zoom,
-            minZoom: 10, // how far out (can see whole Boston)
-            maxZoom: 16 // how close to get
+            minZoom: 8, // how far out (can see whole Boston)
+            maxZoom: 14, // how close to get
+            maxBounds: bostonBounds
         });
 
         map.current.once('load', fetchData);

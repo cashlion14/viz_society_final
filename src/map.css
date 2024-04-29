@@ -1,11 +1,14 @@
-.map-wrap {
+/* Ensuring the map fills the designated area within visualizations */
+.visualizations .primary-viz-content .map-wrap {
     position: relative;
-    width: 100%;
-    height: calc(100vh - 77px); /* calculate height of the screen minus the heading */
+    width: 100%; /* Full width of the container */
+    height: 100%; /* Full height of the container */
 }
 
-.map {
+.visualizations .primary-viz-content .map {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
 }

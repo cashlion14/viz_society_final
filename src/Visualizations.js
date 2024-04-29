@@ -1,12 +1,13 @@
 import './utilities.css'
 import React from "react";
+import Map from "./map.jsx";
 
 
 const Visualizations = () => {
     return (
         <div className="visualizations">
             <div className="primary-viz-content">
-                Insert Primary Map Here
+                <Map/>
                 {/* <Map/>
                 <div>
                    <input id="swipe" type="range" min="0" max="100" defaultValue="50"/>

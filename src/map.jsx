@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as maptilersdk from '@maptiler/sdk';
 import { csvParse } from 'd3-dsv';
 import { scaleSequential } from 'd3-scale';
-import { interpolateYlGn } from 'd3-scale-chromatic';
+import {interpolateReds, interpolateYlGn} from 'd3-scale-chromatic';
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 
@@ -10,7 +10,7 @@ export default function Map() {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [data, setData] = useState(null);
-    const [zoom] = useState(14);
+    const [zoom] = useState(11);
     const [selectedEthnicity, setSelectedEthnicity] = useState('perc_white');
     const boston = {lng: -71.0589, lat: 42.3601};
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
@@ -20,10 +20,12 @@ export default function Map() {
 
         map.current = new maptilersdk.Map({
             container: mapContainer.current,
-            style: maptilersdk.MapStyle.STREETS.NIGHT,
-            // style: maptilersdk.MapStyle.STREETS.DARK,
+            // style: maptilersdk.MapStyle.STREETS.NIGHT,
+            style: maptilersdk.MapStyle.STREETS.DARK,
             center: [boston.lng, boston.lat],
-            zoom: zoom
+            zoom: zoom,
+            minZoom:10, //how far out (can see whole boston)
+            maxZoom:16 //how small to get
         });
         // Add a 'load' event listener
         map.current.once('load', () => {
@@ -47,7 +49,7 @@ export default function Map() {
 
         function getMonochromeColor(value, minValue, maxValue) {
             // Create a scale that returns a color based on the input value
-            const scale = scaleSequential([minValue, maxValue], t => interpolateYlGn(t * 0.5)); // Use only the yellow part
+            const scale = scaleSequential(interpolateReds).domain([minValue, maxValue]);
             return scale(value);
         }
 
@@ -78,10 +80,11 @@ export default function Map() {
                 source: 'neighborhoods',
                 paint: {
                     'fill-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#aaa', // Color for hovered state
-                        ['get', 'value', ['to-color', '#000']], // Convert the value to color
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'value'],
+                        minValue, '#ffcccc',  // Light red
+                        maxValue, '#990000'   // Dark red
                     ],
                     'fill-opacity': 0.75
                 }
@@ -91,7 +94,7 @@ export default function Map() {
                 type: 'line',
                 source: 'neighborhoods',
                 paint: {
-                    'line-color': '#aa0', // Black outline
+                    'line-color': '#aaa', // Black outline
                     'line-width': 3 // Width of the line
                 }
             });

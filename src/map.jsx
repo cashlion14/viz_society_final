@@ -38,13 +38,13 @@ export default function Map() {
         if (!map.current || !geojsonData) return;
 
         // Add event listener for mouseenter to each neighborhood feature
-        map.current.on('mouseenter', 'neighborhoods-fill', handleMouseEnter);
+        map.current.on('mousemove', 'neighborhoods-fill', handleMouseMove);
         // Add event listener for mouseleave to each neighborhood feature
         map.current.on('mouseleave', 'neighborhoods-fill', handleMouseLeave);
 
         return () => {
             // Remove event listeners when component unmounts
-            map.current.off('mouseenter', 'neighborhoods-fill', handleMouseEnter);
+            map.current.off('mousemove', 'neighborhoods-fill', handleMouseMove);
             map.current.off('mouseleave', 'neighborhoods-fill', handleMouseLeave);
         };
     }, [geojsonData]);
@@ -77,42 +77,87 @@ export default function Map() {
         addNeighborhoodsLayer(selectedEthnicity, geojsonData, specificYearData);
     }, [selectedEthnicity, geojsonData, csvData, specificYearData]); // Re-run when ethnicity or data changes
 
-    const handleMouseEnter = (event) => {
-        console.log("handle mouse enter");
+    // const handleMouseEnter = (event) => {
+    //     console.log("handle mouse enter");
+    //     if (!event.features || event.features.length === 0) {
+    //         console.error('No features available in the event');
+    //         return;
+    //     }
+    //
+    //     const properties = event.features[0].properties;
+    //     const featureId = event.features[0].id;
+    //     setHoveredFeature(properties);
+    //     setMousePosition({ x: event.point.x, y: event.point.y });
+    //
+    //     // Darken the color of the hovered feature
+    //     const originalColor = properties.color; // This assumes that color is stored in properties
+    //     const darkenedColor = tinycolor(originalColor).darken(10).toString(); // Adjust the darken value as needed
+    //     console.log("Setting hover color for feature:", featureId, darkenedColor);
+    //
+    //     map.current.setFeatureState(
+    //         { source: 'neighborhoods', id: event.features[0].id },
+    //         { hoverColor: darkenedColor }
+    //     );
+    // };
+
+    const handleMouseMove = (event) => {
         if (!event.features || event.features.length === 0) {
-            console.error('No features available in the event');
+            clearHoverState();
             return;
         }
 
         const properties = event.features[0].properties;
         const featureId = event.features[0].id;
-        setHoveredFeature(properties);
-        setMousePosition({ x: event.point.x, y: event.point.y });
 
-        // Darken the color of the hovered feature
-        const originalColor = properties.color; // This assumes that color is stored in properties
-        const darkenedColor = tinycolor(originalColor).darken(10).toString(); // Adjust the darken value as needed
-        console.log("Setting hover color for feature:", featureId, darkenedColor);
+        // Check if the hovered feature is the same as the previous
+        if (!hoveredFeature || hoveredFeature.id !== featureId) {
+            setHoveredFeature(properties);
+            setMousePosition({ x: event.point.x, y: event.point.y });
 
-        map.current.setFeatureState(
-            { source: 'neighborhoods', id: event.features[0].id },
-            { hoverColor: darkenedColor }
-        );
+            // Update hover state
+            const originalColor = properties.color;
+            const darkenedColor = tinycolor(originalColor).darken(10).toString();
+            map.current.setFeatureState(
+                { source: 'neighborhoods', id: featureId },
+                { hoverColor: darkenedColor }
+            );
+
+            if (hoveredFeature && hoveredFeature.id !== featureId) {
+                // Reset previous hover state
+                map.current.setFeatureState(
+                    { source: 'neighborhoods', id: hoveredFeature.id },
+                    { hoverColor: null }
+                );
+            }
+        }
     };
 
     const handleMouseLeave = (event) => {
-        console.log("handle mouse leave");
-        // Only reset hover state if there's a currently hovered feature
-        if (hoveredFeature && hoveredFeature.id) {
+        clearHoverState();
+    };
+
+    const clearHoverState = () => {
+        if (hoveredFeature) {
             map.current.setFeatureState(
                 { source: 'neighborhoods', id: hoveredFeature.id },
                 { hoverColor: null }
             );
+            setHoveredFeature(null);
         }
-
-        // Clear the hovered feature state
-        setHoveredFeature(null);
     };
+    // const handleMouseLeave = (event) => {
+    //     console.log("handle mouse leave");
+    //     // Only reset hover state if there's a currently hovered feature
+    //     if (hoveredFeature && hoveredFeature.id) {
+    //         map.current.setFeatureState(
+    //             { source: 'neighborhoods', id: hoveredFeature.id },
+    //             { hoverColor: null }
+    //         );
+    //     }
+    //
+    //     // Clear the hovered feature state
+    //     setHoveredFeature(null);
+    // };
     const fetchData = () => {
         fetch('/data/Boston_Neighborhoods.geojson')
             .then(response => response.json())
@@ -174,34 +219,123 @@ export default function Map() {
             map.current.getSource('neighborhoods').setData(geojsonData);
         }
 
+        addOrUpdateLayers();
+        let hoveredNeighborhoodId = null;
+        map.current.on('mousemove', 'neighborhoods-fill', (e) => {
+            if (e.features.length > 0) {
+                const currentHoverId = e.features[0].id;
+                if (hoveredNeighborhoodId !== currentHoverId) {
+                    if (hoveredNeighborhoodId !== null) {
+                        map.current.setFeatureState(
+                            { source: 'neighborhoods', id: hoveredNeighborhoodId },
+                            { hover: false }
+                        );
+                    }
+                    hoveredNeighborhoodId = currentHoverId;
+                    map.current.setFeatureState(
+                        { source: 'neighborhoods', id: hoveredNeighborhoodId },
+                        { hover: true }
+                    );
+                    updateInformationDisplay(e.features[0].properties);
+                }
+            }
+        });
+
+        map.current.on('mouseleave', 'neighborhoods-fill', () => {
+            if (hoveredNeighborhoodId !== null) {
+                map.current.setFeatureState(
+                    { source: 'neighborhoods', id: hoveredNeighborhoodId },
+                    { hover: false }
+                );
+                hoveredNeighborhoodId = null;
+                clearInformationDisplay();
+            }
+        });
+
+        // if (!map.current.getLayer('neighborhoods-fill')) {
+        //     map.current.addLayer({
+        //         id: 'neighborhoods-fill',
+        //         type: 'fill',
+        //         source: 'neighborhoods',
+        //         paint: {
+        //             'fill-color': ['get', 'color'], // Use color property from features
+        //             'fill-opacity': 0.75
+        //         }
+        //         // paint: {
+        //         //     'fill-color': [
+        //         //         'case',
+        //         //         ['boolean', ['feature-state', 'hoverColor'], false],
+        //         //         ['feature-state', 'hoverColor'],
+        //         //         ['get', 'color']
+        //         //     ],
+        //         //     'fill-opacity': 0.75
+        //         // }
+        //     });
+        // }
+        // if (!map.current.getLayer('neighborhoods-outline')) {
+        //     map.current.addLayer({
+        //         id: 'neighborhoods-outline',
+        //         type: 'line',
+        //         source: 'neighborhoods',
+        //         paint: {
+        //             'line-color': '#aaa', // Black outline
+        //             'line-width': 3 // Width of the line
+        //         }
+        //     });
+        // }
+        // if (!map.current.getLayer('neighborhoods-labels')) {
+        //     map.current.addLayer({
+        //         id: 'neighborhoods-labels',
+        //         type: 'symbol',
+        //         source: 'neighborhoods',
+        //         layout: {
+        //             'text-field': ['get', 'blockgr2020_ctr_neighb_name'], // Make sure this matches your GeoJSON properties
+        //             'text-variable-anchor': ['center'],
+        //             'text-radial-offset': 0,
+        //             'text-justify': 'center',
+        //             'text-size': 15
+        //         },
+        //         paint: {
+        //             'text-color': '#ffffff', // White text
+        //             'text-halo-color': '#000000', // Black outline
+        //             'text-halo-width': 2, // Width of the outline, adjust as necessary
+        //             'text-halo-blur': 1 // Optional blur for the outline
+        //         }
+        //     });
+        // }
+
+        // After adding the layers, update them with the right colors
+        geojsonData.features.forEach(feature => {
+            const color = getMonochromeColor(feature.properties.value, minValue, maxValue);
+            map.current.setFeatureState(
+                {source: 'neighborhoods', id: feature.id},
+                {color: color}
+            );
+        });
+    }
+
+    function addOrUpdateLayers() {
+        // Initialize or update fill, outline, and label layers
         if (!map.current.getLayer('neighborhoods-fill')) {
             map.current.addLayer({
                 id: 'neighborhoods-fill',
                 type: 'fill',
                 source: 'neighborhoods',
                 paint: {
-                    'fill-color': ['get', 'color'], // Use color property from features
+                    'fill-color': ['get', 'color'],
                     'fill-opacity': 0.75
                 }
-                // paint: {
-                //     'fill-color': [
-                //         'case',
-                //         ['boolean', ['feature-state', 'hoverColor'], false],
-                //         ['feature-state', 'hoverColor'],
-                //         ['get', 'color']
-                //     ],
-                //     'fill-opacity': 0.75
-                // }
             });
         }
+
         if (!map.current.getLayer('neighborhoods-outline')) {
             map.current.addLayer({
                 id: 'neighborhoods-outline',
                 type: 'line',
                 source: 'neighborhoods',
                 paint: {
-                    'line-color': '#aaa', // Black outline
-                    'line-width': 3 // Width of the line
+                    'line-color': '#aaa',
+                    'line-width': 3
                 }
             });
         }
@@ -212,29 +346,29 @@ export default function Map() {
                 type: 'symbol',
                 source: 'neighborhoods',
                 layout: {
-                    'text-field': ['get', 'blockgr2020_ctr_neighb_name'], // Make sure this matches your GeoJSON properties
+                    'text-field': ['get', 'blockgr2020_ctr_neighb_name'],
                     'text-variable-anchor': ['center'],
                     'text-radial-offset': 0,
                     'text-justify': 'center',
                     'text-size': 15
                 },
                 paint: {
-                    'text-color': '#ffffff', // White text
-                    'text-halo-color': '#000000', // Black outline
-                    'text-halo-width': 2, // Width of the outline, adjust as necessary
-                    'text-halo-blur': 1 // Optional blur for the outline
+                    'text-color': '#ffffff',
+                    'text-halo-color': '#000000',
+                    'text-halo-width': 2,
+                    'text-halo-blur': 1
                 }
             });
         }
+    }
+    function updateInformationDisplay(properties) {
+        // Update the display with information from the hovered neighborhood
+        console.log('Displaying info for:', properties);
+    }
 
-        // After adding the layers, update them with the right colors
-        geojsonData.features.forEach(feature => {
-            const color = getMonochromeColor(feature.properties.value, minValue, maxValue);
-            map.current.setFeatureState(
-                {source: 'neighborhoods', id: feature.id},
-                {color: color}
-            );
-        });
+    function clearInformationDisplay() {
+        // Clear the information display
+        console.log('Clearing display info');
     }
 
     return (

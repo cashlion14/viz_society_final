@@ -17,7 +17,8 @@ function App() {
   const [activeIndex, setActiveIndex] = useState(1);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = (event) => {
+
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
       const scrollThreshold = windowHeight * 0.5;
@@ -48,7 +49,7 @@ function App() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [activeIndex]);
 
   return (
     <div className="app-container">

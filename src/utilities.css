@@ -23,6 +23,23 @@ h1, h2, h3, h4, h5, h6 {
 .primary-viz-content {  
   border: 2px solid white;
   border-radius: 5px;
+  height: 400px;
+  width: 1000px;
+  margin-bottom: 30px;
+}
+
+.secondary-viz-content {
+  display: flex;
+  flex-direction:row;
+}
+
+.barchart-viz {
+  border: 2px solid white;
+  border-radius: 5px;
+  height: 200px;
+  width: 450px;
+  margin-left: 25px;
+  margin-right: 25px;
 }
 
 .circle {

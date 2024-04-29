@@ -4,11 +4,11 @@ import "./utilities.css";
 const EthnicityLabels = () => {
   const circles = [];
 
-  circles.push(<div style={{ display: 'flex', flexDirection: 'row' }}><div className={`circle light-green`}></div><p>Black</p></div>);
-  circles.push(<div style={{ display: 'flex', flexDirection: 'row' }}><div className={`circle pink`}></div><p>Hispanic</p></div>);
-  circles.push(<div style={{ display: 'flex', flexDirection: 'row' }}><div className={`circle green`}></div><p>AAPI</p></div>);
-  circles.push(<div style={{ display: 'flex', flexDirection: 'row' }}><div className={`circle red`}></div><p>White</p></div>);
-  circles.push(<div style={{ display: 'flex', flexDirection: 'row' }}><div className={`circle grey`}></div><p>Multiracial / Other</p></div>);
+  circles.push(<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}><div className={`circle light-green`}></div><p style={{ margin: "0" }}>Black</p></div>);
+  circles.push(<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}><div className={`circle pink`}></div><p style={{ margin: "0" }}>Hispanic</p></div>);
+  circles.push(<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}><div className={`circle green`}></div><p style={{ margin: "0" }}>AAPI</p></div>);
+  circles.push(<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}><div className={`circle red`}></div><p style={{ margin: "0" }}>White</p></div>);
+  circles.push(<div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}><div className={`circle grey`}></div><p style={{ margin: "0" }}>Multiracial / Other</p></div>);
 
   return <div className="circles-column">{circles}</div>;
 };
@@ -50,8 +50,8 @@ export const Page2 = () => {
       <h1> Boston 2020</h1>
         <div className="circles-box">
           {rows}
+          <p style={{ overflowWrap: 'break-word', textAlign: 'right', marginTop: '18px' }}>For every 100 people in Boston, 22 live in corporate owned housing</p>
         </div>
-      <p>For every 100 people in Boston, 22 live in corporate owned housing</p>
     </div>
   );
 };
@@ -83,14 +83,13 @@ export const Page3 = () => {
     <div className='main'>
       <h1> Boston 2020</h1>
       <div className='circles-container'>
-        <EthnicityLabels />
+        <EthnicityLabels className="ethnicity-labels"/>
         <div className="circles-box">
           {rows}
+          <p style={{ overflowWrap: 'break-word', textAlign: 'right', marginTop: '18px' }}>Out of 100 Bostonians, 46 are of traditionally underrepresented minority groups</p>
         </div>
+        <div style={{paddingRight: '173.88px'}}></div>
       </div>
-      <p>
-      Out of 100 Bostonians, 46 are of traditionally underrepresented minority groups
-      </p>
     </div>
   );
 };
@@ -129,12 +128,16 @@ export const Page5 = () => {
   return (
     <div className='main'>
       <h1> Boston 2050</h1>
-      <div className="circles-box">
-        {rows}
+      <div className='circles-container'>
+        <div style={{paddingLeft: '65.17px'}}></div>
+        <div className="circles-box" >
+          {rows}
+          <p style={{ overflowWrap: 'break-word', textAlign: 'right', marginTop: '18px' }}>If trends in corporate ownership continue, 77 out of every 100 people will live in corporate housing by 2050</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <h1>↑<br />55%</h1>
+        </div>
       </div>
-      <p>
-      If trends in corporate ownership continue, 77 out of every 100 people will live in corporate housing by 2050
-      </p>
     </div>
   );
 };
@@ -166,14 +169,15 @@ export const Page6 = () => {
     <div className='main'>
       <h1> Boston 2050</h1>
       <div className='circles-container'>
-        <EthnicityLabels />
+        <EthnicityLabels className="ethnicity-labels"/>
         <div className="circles-box">
           {rows}
+          <p style={{ overflowWrap: 'break-word', textAlign: 'right', marginTop: '18px' }}>At the same time, just 33 of every 100 Bostonians would be of underrepresented minority groups</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '109.28px' }}>
+          <h1>↓ <br /> 13%</h1>
         </div>
       </div>
-      <p>
-      At the same time, just 33 of every 100 Bostonians would be of underrepresented minority groups
-      </p>
     </div>
   );
 };

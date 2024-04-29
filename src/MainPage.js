@@ -1,6 +1,5 @@
 import Navbar from './Navbar.js'; // Import the Navbar component
 import 'bootstrap/dist/css/bootstrap.min.css';
-import myImage from './placeholder.png';
 import './utilities.css'
 import Map from "./map.jsx";
 import Visualizations from './Visualizations.js'

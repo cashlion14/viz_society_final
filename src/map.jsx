@@ -4,9 +4,11 @@ import {csvParse} from 'd3-dsv';
 import {scaleSequential} from 'd3-scale';
 import {interpolateRgb} from 'd3-interpolate';
 import {GradientBar} from './GradientBar';
+import TimeSlider from './timeSlider';
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 import tinycolor from 'tinycolor2';
+import HoverBox from "./hoverBox";
 
 export default function Map() {
     const mapContainer = useRef(null);
@@ -92,31 +94,6 @@ export default function Map() {
         setHoveredFeature(null);
     };
 
-// Render a hover box if a feature is hovered
-    const renderHoverBox = () => {
-        console.log("in render hoverbox");
-        if (!hoveredFeature) return null;
-
-        // Extract information from CSV based on the hovered feature data
-        const neighborhoodData = specificYearData.find(d => d.Neighborhood === hoveredFeature.blockgr2020_ctr_neighb_name);
-        const hoveredEthnicityValue = neighborhoodData ? neighborhoodData[selectedEthnicity] : 'Data not available';
-        console.log("nd", neighborhoodData);
-        console.log("sE", selectedEthnicity, "HD", hoveredEthnicityValue);
-        const style = {
-            left: `${mousePosition.x + 10}px`, // 10px to the right of the cursor
-            top: `${mousePosition.y + 10}px`  // 10px below the cursor
-        };
-        return (
-            <div className="hover-box" style={style}>
-                <h3>{hoveredFeature.blockgr2020_ctr_neighb_name}</h3>
-                {hoveredEthnicityValue && <p>{selectedEthnicity}: {hoveredEthnicityValue}</p>}
-                {neighborhoodData && neighborhoodData.corp_own_rate && <p>Corporate Ownership Rate: {neighborhoodData.corp_own_rate}</p>}
-                {neighborhoodData && neighborhoodData.own_occ_rate && <p>Owner Occupation Rate: {neighborhoodData.own_occ_rate}</p>}
-                <p>Reach out to your city government to learn more about your housing laws: <a href="link to city government">link</a>!</p>
-            </div>
-        );
-    };
-
     useEffect(() => {
         if (map.current) return; // prevents map from initializing more than once
 
@@ -147,9 +124,8 @@ export default function Map() {
                     .then(csvText => {
                         const parsedCsvData = csvParse(csvText);
                         console.log("CSV Data:", parsedCsvData);
-                        console.log("Geo Data:", geojsonData);
+                        console.log("Geo Data:", data);
                         setCsvData(parsedCsvData);
-                        // const year2020Data = parsedCsvData.filter(d => d.Year === '2020');
                         const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear));
                         console.log("CSV 2020 Data:", filteredData);
                         setSpecificYearData(filteredData);
@@ -269,16 +245,18 @@ export default function Map() {
             </select>
             <div ref={mapContainer} className="map"/>
             <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
-            <div className="year-slider">
-                <input type="range"
-                       min="2004"
-                       max="2050"
-                       value={selectedYear}
-                       onChange={e => setSelectedYear(e.target.value)}
-                       className="slider" />
-                <p style={{fontSize:20, fontWeight: "bold", backgroundColor: ethnicityColorMapping[selectedEthnicity]}}>Selected Year: {selectedYear}</p>
-            </div>
-            {hoveredFeature ? renderHoverBox() : null}
+            <TimeSlider
+                selectedYear={selectedYear}
+                setSelectedYear={setSelectedYear}
+                ethnicityColorMapping={ethnicityColorMapping}
+                selectedEthnicity={selectedEthnicity}/>
+            <HoverBox
+                hoveredFeature={hoveredFeature}
+                mousePosition={mousePosition}
+                specificYearData={specificYearData}
+                selectedEthnicity={selectedEthnicity}
+            />
+            {/*{hoveredFeature ? renderHoverBox() : null}*/}
         </div>
 
     );

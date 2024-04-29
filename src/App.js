@@ -78,7 +78,7 @@ function App() {
         <Component8 />
       </div>
       <div className={activeIndex === 9 ? "component active" : "component"}>
-        <Component9 />
+          <Component9 />
       </div>
     </div>
   );

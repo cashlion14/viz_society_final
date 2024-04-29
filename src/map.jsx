@@ -18,6 +18,7 @@ export default function Map() {
     const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [selectedYear, setSelectedYear] = useState(2020);
 
     const boston = {lng: -71.0589, lat: 42.3601};
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
@@ -44,6 +45,10 @@ export default function Map() {
             map.current.off('mouseleave', 'neighborhoods-fill', handleMouseLeave);
         };
     }, [geojsonData]);
+
+    useEffect(() => {
+        fetchData();
+    }, [selectedYear]);
 
     const handleMouseEnter = (event) => {
         console.log("handle mouse enter");
@@ -120,7 +125,7 @@ export default function Map() {
         });
 
         map.current.once('load', fetchData);
-    }, []);
+    }, [selectedYear]);
 
     useEffect(() => {
         if (!map.current || !geojsonData || !csvData) return; // Ensure the map and data are loaded
@@ -138,9 +143,10 @@ export default function Map() {
                         const parsedCsvData = csvParse(csvText);
                         console.log("CSV Data:", parsedCsvData);
                         console.log("Geo Data:", geojsonData);
-                        const year2020Data = parsedCsvData.filter(d => d.Year === '2020');
-                        console.log("CSV 2020 Data:", year2020Data);
-                        setCsvData(year2020Data);
+                        // const year2020Data = parsedCsvData.filter(d => d.Year === '2020');
+                        const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear));
+                        console.log("CSV 2020 Data:", filteredData);
+                        setCsvData(filteredData);
                     });
             });
     }
@@ -257,7 +263,17 @@ export default function Map() {
             </select>
             <div ref={mapContainer} className="map"/>
             <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
+            <div className="year-slider">
+                <input type="range"
+                       min="2000"
+                       max="2050"
+                       value={selectedYear}
+                       onChange={e => setSelectedYear(e.target.value)}
+                       className="slider" />
+                <p>Selected Year: {selectedYear}</p>
+            </div>
             {hoveredFeature ? renderHoverBox() : null}
+
         </div>
 
     );

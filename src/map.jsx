@@ -1,9 +1,9 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as maptilersdk from '@maptiler/sdk';
-import { csvParse } from 'd3-dsv';
-import { scaleSequential } from 'd3-scale';
+import {csvParse} from 'd3-dsv';
+import {scaleSequential} from 'd3-scale';
 import {interpolateRgb} from 'd3-interpolate';
-import {interpolateReds, interpolateYlGn} from 'd3-scale-chromatic';
+import {GradientBar} from './GradientBar';
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 
@@ -14,6 +14,7 @@ export default function Map() {
     const [csvData, setCsvData] = useState(null);
     const [zoom] = useState(11);
     const [selectedEthnicity, setSelectedEthnicity] = useState('perc_aapi');
+    const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
     const boston = {lng: -71.0589, lat: 42.3601};
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
     const ethnicityColorMapping = {
@@ -22,7 +23,7 @@ export default function Map() {
         perc_aapi: '#3A481E', // Green
         // perc_hispanic: '#EC9192', // Pink
         perc_other: '#EC9192', // Grey
-        perc_two_or_more: '#D9D9D9' // Grey for multiracial and two or more (or define another color)
+        perc_two_or_more: '#000' // Grey for multiracial and two or more (or define another color)
     };
 
     useEffect(() => {
@@ -43,7 +44,7 @@ export default function Map() {
     useEffect(() => {
         if (!map.current || !geojsonData || !csvData) return; // Ensure the map and data are loaded
         addNeighborhoodsLayer(selectedEthnicity, geojsonData, csvData);
-    }, [selectedEthnicity,  geojsonData, csvData]); // Re-run when ethnicity or data changes
+    }, [selectedEthnicity, geojsonData, csvData]); // Re-run when ethnicity or data changes
 
     const fetchData = () => {
         fetch('/data/Boston_Neighborhoods.geojson')
@@ -62,17 +63,17 @@ export default function Map() {
                     });
             });
     }
-    const getMonochromeColor = (value, minValue, maxValue,color)=> {
+    const getMonochromeColor = (value, minValue, maxValue, color) => {
         // Create a scale that returns a color based on the input value
         const scale = scaleSequential(interpolateRgb(`#ffffff`, color)).domain([minValue, maxValue]);
         return scale(value);
     };
-    const addNeighborhoodsLayer = (selectedEthnicity, geojsonData, year2020Data)=>
-    {
+    const addNeighborhoodsLayer = (selectedEthnicity, geojsonData, year2020Data) => {
         // Find min and max values for the selected ethnicity for proper scaling
         const values = csvData.map(d => parseFloat(d[selectedEthnicity]));
         const minValue = Math.min(...values);
         const maxValue = Math.max(...values);
+        setMaxEthnicityValue(maxValue);
 
         if (map.current.getLayer('neighborhoods-fill')) {
             map.current.removeLayer('neighborhoods-fill');
@@ -146,15 +147,16 @@ export default function Map() {
         geojsonData.features.forEach(feature => {
             const color = getMonochromeColor(feature.properties.value, minValue, maxValue);
             map.current.setFeatureState(
-                { source: 'neighborhoods', id: feature.id },
-                { color: color }
+                {source: 'neighborhoods', id: feature.id},
+                {color: color}
             );
         });
     }
 
     return (
         <div className="map-wrap">
-            <select className="map-overlay" value={selectedEthnicity} onChange={e => setSelectedEthnicity(e.target.value)}>
+            <select className="map-overlay" value={selectedEthnicity}
+                    onChange={e => setSelectedEthnicity(e.target.value)}>
                 <option value="perc_aapi">Percentage AAPI</option>
                 <option value="perc_black">Percentage Black</option>
                 <option value="perc_white">Percentage White</option>
@@ -162,7 +164,9 @@ export default function Map() {
                 <option value="perc_two_or_more">Percentage Two or More</option>
             </select>
             <div ref={mapContainer} className="map"/>
+            <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
         </div>
+
     );
 }
 

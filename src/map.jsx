@@ -22,9 +22,9 @@ export default function Map() {
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [selectedYear, setSelectedYear] = useState(2020);
-
     const boston = {lng: -71.0589, lat: 42.3601};
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
+
     const ethnicityColorMapping = {
         perc_white: '#A72608', // Red
         perc_black: '#566C2C', // Light green
@@ -56,6 +56,26 @@ export default function Map() {
             setSpecificYearData(filteredData);
         }
     }, [csvData, selectedYear]);
+
+    useEffect(() => {
+        if (map.current) return; // prevents map from initializing more than once
+
+        map.current = new maptilersdk.Map({
+            container: mapContainer.current,
+            style: maptilersdk.MapStyle.STREETS.DARK,
+            center: [boston.lng, boston.lat],
+            zoom: zoom,
+            minZoom: 10, // how far out (can see whole Boston)
+            maxZoom: 16 // how close to get
+        });
+
+        map.current.once('load', fetchData);
+    }, [selectedYear]);
+
+    useEffect(() => {
+        if (!map.current || !geojsonData || !csvData) return; // Ensure the map and data are loaded
+        addNeighborhoodsLayer(selectedEthnicity, geojsonData, specificYearData);
+    }, [selectedEthnicity, geojsonData, csvData, specificYearData]); // Re-run when ethnicity or data changes
 
     const handleMouseEnter = (event) => {
         console.log("handle mouse enter");
@@ -93,27 +113,6 @@ export default function Map() {
         // Clear the hovered feature state
         setHoveredFeature(null);
     };
-
-    useEffect(() => {
-        if (map.current) return; // prevents map from initializing more than once
-
-        map.current = new maptilersdk.Map({
-            container: mapContainer.current,
-            style: maptilersdk.MapStyle.STREETS.DARK,
-            center: [boston.lng, boston.lat],
-            zoom: zoom,
-            minZoom: 10, // how far out (can see whole Boston)
-            maxZoom: 16 // how close to get
-        });
-
-        map.current.once('load', fetchData);
-    }, [selectedYear]);
-
-    useEffect(() => {
-        if (!map.current || !geojsonData || !csvData) return; // Ensure the map and data are loaded
-        addNeighborhoodsLayer(selectedEthnicity, geojsonData, specificYearData);
-    }, [selectedEthnicity, geojsonData, csvData, specificYearData]); // Re-run when ethnicity or data changes
-
     const fetchData = () => {
         fetch('/data/Boston_Neighborhoods.geojson')
             .then(response => response.json())
@@ -144,20 +143,11 @@ export default function Map() {
         const maxValue = Math.max(...values);
         setMaxEthnicityValue(maxValue);
 
-        if (map.current.getLayer('neighborhoods-fill')) {
-            map.current.removeLayer('neighborhoods-fill');
-        }
-        if (map.current.getLayer('neighborhoods-outline')) {
-            map.current.removeLayer('neighborhoods-outline');
-        }
-        if (map.current.getLayer('neighborhoods-labels')) {
-            map.current.removeLayer('neighborhoods-labels');
-        }
-        if (map.current.getSource('neighborhoods')) {
-            map.current.removeSource('neighborhoods');
-        }
-
         const baseColor = ethnicityColorMapping[selectedEthnicity] || '#FFFFFF';
+
+        const updateFillColor = (neighborhoodId, newColor) => {
+            map.current.setPaintProperty('neighborhoods-fill', 'fill-color', ['match', ['get', 'id'], neighborhoodId, newColor, '#888888']);
+        };
 
         geojsonData.features.forEach((feature, index) => {
             feature.id = feature.id || index;
@@ -165,63 +155,77 @@ export default function Map() {
                 d.Neighborhood === feature.properties.blockgr2020_ctr_neighb_name);
             feature.properties.value = neighborhoodData ? parseFloat(neighborhoodData[selectedEthnicity]) : 0;
             feature.properties.color = getMonochromeColor(feature.properties.value, minValue, maxValue, baseColor);
-
+            // const neighborhoodId = feature.id;
+            // const newColor = feature.properties.color;
+            // // // Setting feature state for dynamic styling
+            // // map.current.setFeatureState(
+            // //     { source: 'neighborhoods', id: neighborhoodId },
+            // //     { color: newColor }
+            // // );
         });
 
-        // Add the source for neighborhoods
-        map.current.addSource('neighborhoods', {
-            type: 'geojson',
-            data: geojsonData,
-            promoteId: 'id'
-        });
+        if (!map.current.getSource('neighborhoods')) {
+            map.current.addSource('neighborhoods', {
+                type: 'geojson',
+                data: geojsonData,
+                promoteId: 'id'
+            });
+        } else {
+            map.current.getSource('neighborhoods').setData(geojsonData);
+        }
 
-        // Add layer for coloring
-        map.current.addLayer({
-            id: 'neighborhoods-fill',
-            type: 'fill',
-            source: 'neighborhoods',
-            // paint: {
-            //     'fill-color': ['get', 'color'], // Use color property from features
-            //     'fill-opacity': 0.75
-            // }
-            paint: {
-                'fill-color': [
-                    'case',
-                    ['boolean', ['feature-state', 'hoverColor'], false],
-                    ['feature-state', 'hoverColor'],
-                    ['get', 'color']
-                ],
-                'fill-opacity': 0.75
-            }
-        });
-        map.current.addLayer({
-            id: 'neighborhoods-outline',
-            type: 'line',
-            source: 'neighborhoods',
-            paint: {
-                'line-color': '#aaa', // Black outline
-                'line-width': 3 // Width of the line
-            }
-        });
+        if (!map.current.getLayer('neighborhoods-fill')) {
+            map.current.addLayer({
+                id: 'neighborhoods-fill',
+                type: 'fill',
+                source: 'neighborhoods',
+                paint: {
+                    'fill-color': ['get', 'color'], // Use color property from features
+                    'fill-opacity': 0.75
+                }
+                // paint: {
+                //     'fill-color': [
+                //         'case',
+                //         ['boolean', ['feature-state', 'hoverColor'], false],
+                //         ['feature-state', 'hoverColor'],
+                //         ['get', 'color']
+                //     ],
+                //     'fill-opacity': 0.75
+                // }
+            });
+        }
+        if (!map.current.getLayer('neighborhoods-outline')) {
+            map.current.addLayer({
+                id: 'neighborhoods-outline',
+                type: 'line',
+                source: 'neighborhoods',
+                paint: {
+                    'line-color': '#aaa', // Black outline
+                    'line-width': 3 // Width of the line
+                }
+            });
+        }
 
-        map.current.addLayer({
-            id: 'neighborhoods-labels',
-            type: 'symbol',
-            source: 'neighborhoods',
-            layout: {
-                'text-field': ['get', 'blockgr2020_ctr_neighb_name'], // Make sure this matches your GeoJSON properties
-                'text-variable-anchor': ['center'],
-                'text-radial-offset': 0,
-                'text-justify': 'center',
-                'text-size': 15
-            },
-            paint: {
-                'text-color': '#ffffff', // White text
-                'text-halo-color': '#000000', // Black outline
-                'text-halo-width': 2, // Width of the outline, adjust as necessary
-                'text-halo-blur': 1 // Optional blur for the outline
-            }
-        });
+        if (!map.current.getLayer('neighborhoods-labels')) {
+            map.current.addLayer({
+                id: 'neighborhoods-labels',
+                type: 'symbol',
+                source: 'neighborhoods',
+                layout: {
+                    'text-field': ['get', 'blockgr2020_ctr_neighb_name'], // Make sure this matches your GeoJSON properties
+                    'text-variable-anchor': ['center'],
+                    'text-radial-offset': 0,
+                    'text-justify': 'center',
+                    'text-size': 15
+                },
+                paint: {
+                    'text-color': '#ffffff', // White text
+                    'text-halo-color': '#000000', // Black outline
+                    'text-halo-width': 2, // Width of the outline, adjust as necessary
+                    'text-halo-blur': 1 // Optional blur for the outline
+                }
+            });
+        }
 
         // After adding the layers, update them with the right colors
         geojsonData.features.forEach(feature => {
@@ -256,7 +260,6 @@ export default function Map() {
                 specificYearData={specificYearData}
                 selectedEthnicity={selectedEthnicity}
             />
-            {/*{hoveredFeature ? renderHoverBox() : null}*/}
         </div>
 
     );

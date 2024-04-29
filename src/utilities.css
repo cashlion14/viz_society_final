@@ -17,9 +17,55 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     align-items: center;
     text-align: center;
+    height: 100vh;
   }
   
-  .primary-viz-content {  
-    border: 2px solid white;
-    border-radius: 5px;
-  }
+.primary-viz-content {  
+  border: 2px solid white;
+  border-radius: 5px;
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  background-color: white;
+  margin: 5px;
+}
+
+.circles-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.circles-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.row {
+  display: flex;
+}
+
+.red {
+  background-color: #A72608; /* Red color */
+}
+
+.grey {
+  background-color: #D9D9D9; /* Red color */
+}
+
+.green {
+  background-color: #3A481E; /* Red color */
+}
+
+.light-green {
+  background-color: #566C2C; /* Red color */
+}
+
+.pink {
+  background-color: #EC9192; /* Red color */
+}

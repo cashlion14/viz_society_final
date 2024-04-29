@@ -15,12 +15,15 @@ export default function Map() {
     const [geojsonData, setGeojsonData] = useState(null);
     const [csvData, setCsvData] = useState(null);
     const [specificYearData, setSpecificYearData] = useState(null);
-    const [zoom] = useState(11);
+    const [zoom] = useState(12);
     const [selectedEthnicity, setSelectedEthnicity] = useState('perc_white');
     const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
     const [selectedYear, setSelectedYear] = useState(2020);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const timerRef = useRef();
+    const dataLength = 2050 - 2004 + 1;
     const boston = {lng: -71.0589, lat: 42.3601};
     const bostonBounds = [
         [-71.291421, 42.127797],  // Southwest coordinates
@@ -36,6 +39,29 @@ export default function Map() {
         perc_other: '#EC9192', // Grey
         perc_two_or_more: '#000' // Grey for multiracial and two or more (or define another color)
     };
+
+    const handlePlayPause = () => {
+        setIsPlaying(!isPlaying);
+    };
+
+    useEffect(() => {
+        if (isPlaying) {
+            timerRef.current = setInterval(() => {
+                setSelectedYear(prevYear => {
+                    let nextYear = prevYear + 1;
+                    if (nextYear > 2050) {
+                        nextYear = 2004;  // Loop back to start
+                    }
+                    // updateMapForYear(nextYear);
+                    return nextYear;
+                });
+            }, 700); // Change the year every second
+        } else {
+            clearInterval(timerRef.current);
+        }
+
+        return () => clearInterval(timerRef.current);
+    }, [isPlaying]);
 
     useEffect(() => {
         if (!map.current || !geojsonData) return;
@@ -59,6 +85,7 @@ export default function Map() {
             setSpecificYearData(filteredData);
         }
     }, [csvData, selectedYear]);
+
 
     useEffect(() => {
         if (map.current) return; // prevents map from initializing more than once
@@ -298,11 +325,27 @@ export default function Map() {
             </select>
             <div ref={mapContainer} className="map"/>
             <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
-            <TimeSlider
-                selectedYear={selectedYear}
-                setSelectedYear={setSelectedYear}
-                ethnicityColorMapping={ethnicityColorMapping}
-                selectedEthnicity={selectedEthnicity}/>
+            <div className="flex-container" style={{
+                display: 'flex',       // Enables flexbox layout
+                alignItems: 'center', // Vertically aligns items in the center
+                marginLeft: '220px'
+            }}>
+                <button onClick={handlePlayPause} style={{
+                    marginTop: '5px',  // Adds space between button and slider
+                    padding: '5px 15px', // Adjusts padding for better visual appeal
+                    fontSize: '16px',     // Ensures text size is appropriate
+                    cursor: 'pointer',     // Changes cursor to pointer on hover
+                    zIndex: 1000
+                }}>
+                    {isPlaying ? 'Pause' : 'Play'}
+                </button>
+                <TimeSlider
+                    selectedYear={selectedYear}
+                    setSelectedYear={setSelectedYear}
+                    ethnicityColorMapping={ethnicityColorMapping}
+                    selectedEthnicity={selectedEthnicity}
+                />
+            </div>
             <HoverBox
                 hoveredFeature={hoveredFeature}
                 mousePosition={mousePosition}

@@ -3,7 +3,7 @@ import React from 'react';
 
 const TimeSlider = ({ selectedYear, setSelectedYear, ethnicityColorMapping, selectedEthnicity }) => {
     return (
-        <div className="year-slider">
+        <div className="year-slider" style={{marginLeft: '55px'}}>
             <input type="range"
                    min="2004"
                    max="2050"

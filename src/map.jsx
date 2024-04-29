@@ -13,6 +13,7 @@ export default function Map() {
     const map = useRef(null);
     const [geojsonData, setGeojsonData] = useState(null);
     const [csvData, setCsvData] = useState(null);
+    const [specificYearData, setSpecificYearData] = useState(null);
     const [zoom] = useState(11);
     const [selectedEthnicity, setSelectedEthnicity] = useState('perc_aapi');
     const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
@@ -47,8 +48,12 @@ export default function Map() {
     }, [geojsonData]);
 
     useEffect(() => {
-        fetchData();
-    }, [selectedYear]);
+        if (csvData && csvData.length > 0) { // Ensure csvData is loaded and is not empty
+            const filteredData = csvData.filter(d => d.Year === String(selectedYear));
+            console.log("CSV", selectedYear, "Data:", filteredData);
+            setSpecificYearData(filteredData);
+        }
+    }, [csvData, selectedYear]);
 
     const handleMouseEnter = (event) => {
         console.log("handle mouse enter");
@@ -93,7 +98,7 @@ export default function Map() {
         if (!hoveredFeature) return null;
 
         // Extract information from CSV based on the hovered feature data
-        const neighborhoodData = csvData.find(d => d.Neighborhood === hoveredFeature.blockgr2020_ctr_neighb_name);
+        const neighborhoodData = specificYearData.find(d => d.Neighborhood === hoveredFeature.blockgr2020_ctr_neighb_name);
         const hoveredEthnicityValue = neighborhoodData ? neighborhoodData[selectedEthnicity] : 'Data not available';
         console.log("nd", neighborhoodData);
         console.log("sE", selectedEthnicity, "HD", hoveredEthnicityValue);
@@ -129,8 +134,8 @@ export default function Map() {
 
     useEffect(() => {
         if (!map.current || !geojsonData || !csvData) return; // Ensure the map and data are loaded
-        addNeighborhoodsLayer(selectedEthnicity, geojsonData, csvData);
-    }, [selectedEthnicity, geojsonData, csvData]); // Re-run when ethnicity or data changes
+        addNeighborhoodsLayer(selectedEthnicity, geojsonData, specificYearData);
+    }, [selectedEthnicity, geojsonData, csvData, specificYearData]); // Re-run when ethnicity or data changes
 
     const fetchData = () => {
         fetch('/data/Boston_Neighborhoods.geojson')
@@ -143,10 +148,11 @@ export default function Map() {
                         const parsedCsvData = csvParse(csvText);
                         console.log("CSV Data:", parsedCsvData);
                         console.log("Geo Data:", geojsonData);
+                        setCsvData(parsedCsvData);
                         // const year2020Data = parsedCsvData.filter(d => d.Year === '2020');
                         const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear));
                         console.log("CSV 2020 Data:", filteredData);
-                        setCsvData(filteredData);
+                        setSpecificYearData(filteredData);
                     });
             });
     }
@@ -157,7 +163,7 @@ export default function Map() {
     };
     const addNeighborhoodsLayer = (selectedEthnicity, geojsonData, year2020Data) => {
         // Find min and max values for the selected ethnicity for proper scaling
-        const values = csvData.map(d => parseFloat(d[selectedEthnicity]));
+        const values = specificYearData.map(d => parseFloat(d[selectedEthnicity]));
         const minValue = Math.min(...values);
         const maxValue = Math.max(...values);
         setMaxEthnicityValue(maxValue);
@@ -179,7 +185,7 @@ export default function Map() {
 
         geojsonData.features.forEach((feature, index) => {
             feature.id = feature.id || index;
-            const neighborhoodData = csvData.find(d =>
+            const neighborhoodData = specificYearData.find(d =>
                 d.Neighborhood === feature.properties.blockgr2020_ctr_neighb_name);
             feature.properties.value = neighborhoodData ? parseFloat(neighborhoodData[selectedEthnicity]) : 0;
             feature.properties.color = getMonochromeColor(feature.properties.value, minValue, maxValue, baseColor);
@@ -265,15 +271,14 @@ export default function Map() {
             <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
             <div className="year-slider">
                 <input type="range"
-                       min="2000"
+                       min="2004"
                        max="2050"
                        value={selectedYear}
                        onChange={e => setSelectedYear(e.target.value)}
                        className="slider" />
-                <p>Selected Year: {selectedYear}</p>
+                <p style={{fontSize:20, fontWeight: "bold", backgroundColor: ethnicityColorMapping[selectedEthnicity]}}>Selected Year: {selectedYear}</p>
             </div>
             {hoveredFeature ? renderHoverBox() : null}
-
         </div>
 
     );

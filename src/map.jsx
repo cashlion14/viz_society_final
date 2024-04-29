@@ -20,13 +20,13 @@ export default function Map() {
 
         map.current = new maptilersdk.Map({
             container: mapContainer.current,
-            // style: maptilersdk.MapStyle.STREETS.NIGHT,
             style: maptilersdk.MapStyle.STREETS.DARK,
             center: [boston.lng, boston.lat],
             zoom: zoom,
             minZoom:10, //how far out (can see whole boston)
             maxZoom:16 //how small to get
         });
+
         // Add a 'load' event listener
         map.current.once('load', () => {
             fetch('/data/Boston_Neighborhoods.geojson')
@@ -99,6 +99,25 @@ export default function Map() {
                 }
             });
 
+            map.current.addLayer({
+                id: 'neighborhoods-labels',
+                type: 'symbol',
+                source: 'neighborhoods',
+                layout: {
+                    'text-field': ['get', 'blockgr2020_ctr_neighb_name'], // Make sure this matches your GeoJSON properties
+                    'text-variable-anchor': ['center'],
+                    'text-radial-offset': 0,
+                    'text-justify': 'center',
+                    'text-size': 15
+                },
+                paint: {
+                    'text-color': '#ffffff', // White text
+                    'text-halo-color': '#000000', // Black outline
+                    'text-halo-width': 2, // Width of the outline, adjust as necessary
+                    'text-halo-blur': 1 // Optional blur for the outline
+                }
+            });
+
             // After adding the layers, update them with the right colors
             geojsonData.features.forEach(feature => {
                 const color = getMonochromeColor(feature.properties.value, minValue, maxValue);
@@ -111,7 +130,9 @@ export default function Map() {
     }, [boston.lng, boston.lat, zoom, selectedEthnicity]);
     return (
         <div className="map-wrap">
+
             <div ref={mapContainer} className="map"/>
         </div>
     );
 }
+

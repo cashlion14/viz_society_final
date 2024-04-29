@@ -7,7 +7,6 @@ import {GradientBar} from './GradientBar';
 import TimeSlider from './timeSlider';
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
-import tinycolor from 'tinycolor2';
 import HoverBox from "./hoverBox";
 
 export default function Map() {
@@ -17,10 +16,10 @@ export default function Map() {
     const [csvData, setCsvData] = useState(null);
     const [specificYearData, setSpecificYearData] = useState(null);
     const [zoom] = useState(11);
-    const [selectedEthnicity, setSelectedEthnicity] = useState('perc_aapi');
+    const [selectedEthnicity, setSelectedEthnicity] = useState('perc_white');
     const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
     const [hoveredFeature, setHoveredFeature] = useState(null);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
     const [selectedYear, setSelectedYear] = useState(2020);
     const boston = {lng: -71.0589, lat: 42.3601};
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
@@ -47,7 +46,7 @@ export default function Map() {
             map.current.off('mousemove', 'neighborhoods-fill', handleMouseMove);
             map.current.off('mouseleave', 'neighborhoods-fill', handleMouseLeave);
         };
-    }, [geojsonData,map.current]);
+    }, [geojsonData, map.current]);
 
     useEffect(() => {
         if (csvData && csvData.length > 0) { // Ensure csvData is loaded and is not empty
@@ -78,36 +77,34 @@ export default function Map() {
     }, [selectedEthnicity, geojsonData, csvData, specificYearData]); // Re-run when ethnicity or data changes
 
     const handleMouseMove = (event) => {
-        if (!event.features || event.features.length === 0) {
+        if (event.features.length === 0) {
             clearHoverState();
             return;
         }
+        const newHoveredFeature = event.features[0];
+        const featureId = newHoveredFeature.id;
 
-        const properties = event.features[0].properties;
-        const featureId = event.features[0].id;
-
-        // Check if the hovered feature is the same as the previous
         if (!hoveredFeature || hoveredFeature.id !== featureId) {
-            setHoveredFeature(properties);
-            setMousePosition({ x: event.point.x, y: event.point.y });
-
-            // Update hover state
-            const originalColor = properties.color;
-            const darkenedColor = tinycolor(originalColor).darken(10).toString();
-            map.current.setFeatureState(
-                { source: 'neighborhoods', id: featureId },
-                { hoverColor: darkenedColor }
-            );
-
-            if (hoveredFeature && hoveredFeature.id !== featureId) {
-                // Reset previous hover state
+            // Reset previous hover state if exists
+            if (hoveredFeature) {
                 map.current.setFeatureState(
-                    { source: 'neighborhoods', id: hoveredFeature.id },
-                    { hoverColor: null }
+                    {source: 'neighborhoods', id: hoveredFeature.id},
+                    {hover: false}
                 );
             }
+
+            // Set new hover state
+            map.current.setFeatureState(
+                {source: 'neighborhoods', id: featureId},
+                {hover: true}
+            );
+
+            setHoveredFeature({...newHoveredFeature.properties, id: featureId});
         }
-    };
+
+        setMousePosition({x: event.point.x, y: event.point.y});
+    }
+
 
     const handleMouseLeave = (event) => {
         clearHoverState();
@@ -116,11 +113,12 @@ export default function Map() {
     const clearHoverState = () => {
         if (hoveredFeature) {
             map.current.setFeatureState(
-                { source: 'neighborhoods', id: hoveredFeature.id },
-                { hoverColor: null }
+                {source: 'neighborhoods', id: hoveredFeature.id},
+                {hover: false}
             );
+            map.current.setPaintProperty('neighborhoods-fill', 'fill-color', ['get', 'color']);
             setHoveredFeature(null);
-            setMousePosition({ x: 0, y: 0 });
+            setMousePosition({x: 0, y: 0});
         }
     };
 
@@ -128,6 +126,9 @@ export default function Map() {
         fetch('/data/Boston_Neighborhoods.geojson')
             .then(response => response.json())
             .then(data => {
+                data.features.forEach((feature, index) => {
+                    feature.id = feature.id || index;
+                });
                 setGeojsonData(data);
                 fetch('/data/all_data_2004_to_2050.csv')
                     .then(response => response.text())
@@ -156,30 +157,18 @@ export default function Map() {
 
         const baseColor = ethnicityColorMapping[selectedEthnicity] || '#FFFFFF';
 
-        const updateFillColor = (neighborhoodId, newColor) => {
-            map.current.setPaintProperty('neighborhoods-fill', 'fill-color', ['match', ['get', 'id'], neighborhoodId, newColor, '#888888']);
-        };
-
         geojsonData.features.forEach((feature, index) => {
             feature.id = feature.id || index;
             const neighborhoodData = specificYearData.find(d =>
                 d.Neighborhood === feature.properties.blockgr2020_ctr_neighb_name);
             feature.properties.value = neighborhoodData ? parseFloat(neighborhoodData[selectedEthnicity]) : 0;
             feature.properties.color = getMonochromeColor(feature.properties.value, minValue, maxValue, baseColor);
-            // const neighborhoodId = feature.id;
-            // const newColor = feature.properties.color;
-            // // // Setting feature state for dynamic styling
-            // // map.current.setFeatureState(
-            // //     { source: 'neighborhoods', id: neighborhoodId },
-            // //     { color: newColor }
-            // // );
         });
 
         if (!map.current.getSource('neighborhoods')) {
             map.current.addSource('neighborhoods', {
                 type: 'geojson',
-                data: geojsonData,
-                promoteId: 'id'
+                data: geojsonData
             });
         } else {
             map.current.getSource('neighborhoods').setData(geojsonData);
@@ -193,14 +182,14 @@ export default function Map() {
                 if (hoveredNeighborhoodId !== currentHoverId) {
                     if (hoveredNeighborhoodId !== null) {
                         map.current.setFeatureState(
-                            { source: 'neighborhoods', id: hoveredNeighborhoodId },
-                            { hover: false }
+                            {source: 'neighborhoods', id: hoveredNeighborhoodId},
+                            {hover: false}
                         );
                     }
                     hoveredNeighborhoodId = currentHoverId;
                     map.current.setFeatureState(
-                        { source: 'neighborhoods', id: hoveredNeighborhoodId },
-                        { hover: true }
+                        {source: 'neighborhoods', id: hoveredNeighborhoodId},
+                        {hover: true}
                     );
                     updateInformationDisplay(e.features[0].properties);
                 }
@@ -210,65 +199,13 @@ export default function Map() {
         map.current.on('mouseleave', 'neighborhoods-fill', () => {
             if (hoveredNeighborhoodId !== null) {
                 map.current.setFeatureState(
-                    { source: 'neighborhoods', id: hoveredNeighborhoodId },
-                    { hover: false }
+                    {source: 'neighborhoods', id: hoveredNeighborhoodId},
+                    {hover: false}
                 );
                 hoveredNeighborhoodId = null;
                 clearInformationDisplay();
             }
         });
-
-        // if (!map.current.getLayer('neighborhoods-fill')) {
-        //     map.current.addLayer({
-        //         id: 'neighborhoods-fill',
-        //         type: 'fill',
-        //         source: 'neighborhoods',
-        //         paint: {
-        //             'fill-color': ['get', 'color'], // Use color property from features
-        //             'fill-opacity': 0.75
-        //         }
-        //         // paint: {
-        //         //     'fill-color': [
-        //         //         'case',
-        //         //         ['boolean', ['feature-state', 'hoverColor'], false],
-        //         //         ['feature-state', 'hoverColor'],
-        //         //         ['get', 'color']
-        //         //     ],
-        //         //     'fill-opacity': 0.75
-        //         // }
-        //     });
-        // }
-        // if (!map.current.getLayer('neighborhoods-outline')) {
-        //     map.current.addLayer({
-        //         id: 'neighborhoods-outline',
-        //         type: 'line',
-        //         source: 'neighborhoods',
-        //         paint: {
-        //             'line-color': '#aaa', // Black outline
-        //             'line-width': 3 // Width of the line
-        //         }
-        //     });
-        // }
-        // if (!map.current.getLayer('neighborhoods-labels')) {
-        //     map.current.addLayer({
-        //         id: 'neighborhoods-labels',
-        //         type: 'symbol',
-        //         source: 'neighborhoods',
-        //         layout: {
-        //             'text-field': ['get', 'blockgr2020_ctr_neighb_name'], // Make sure this matches your GeoJSON properties
-        //             'text-variable-anchor': ['center'],
-        //             'text-radial-offset': 0,
-        //             'text-justify': 'center',
-        //             'text-size': 15
-        //         },
-        //         paint: {
-        //             'text-color': '#ffffff', // White text
-        //             'text-halo-color': '#000000', // Black outline
-        //             'text-halo-width': 2, // Width of the outline, adjust as necessary
-        //             'text-halo-blur': 1 // Optional blur for the outline
-        //         }
-        //     });
-        // }
 
         // After adding the layers, update them with the right colors
         geojsonData.features.forEach(feature => {
@@ -288,7 +225,12 @@ export default function Map() {
                 type: 'fill',
                 source: 'neighborhoods',
                 paint: {
-                    'fill-color': ['get', 'color'],
+                    'fill-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        'rgba(0, 0, 0, 1)',  // White tint if hovered
+                        ['get', 'color']  // Original color from feature properties
+                    ],
                     'fill-opacity': 0.75
                 }
             });
@@ -327,6 +269,7 @@ export default function Map() {
             });
         }
     }
+
     function updateInformationDisplay(properties) {
         // Update the display with information from the hovered neighborhood
         console.log('Displaying info for:', properties);

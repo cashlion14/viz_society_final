@@ -8,11 +8,6 @@ const Visualizations = () => {
         <div className="visualizations">
             <div className="primary-viz-content">
                 <Map/>
-                {/* <Map/>
-                <div>
-                   <input id="swipe" type="range" min="0" max="100" defaultValue="50"/>
-                   <div id="map" style={{width: '800px', height: '600px'}}></div>
-                </div> */}
             </div>
             <div className="secondary-viz-content">
                 <div className="barchart-viz" style={{marginBottom: '25px'}}>

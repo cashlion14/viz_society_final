@@ -6,6 +6,7 @@ import {interpolateRgb} from 'd3-interpolate';
 import {GradientBar} from './GradientBar';
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
+import tinycolor from 'tinycolor2';
 
 export default function Map() {
     const mapContainer = useRef(null);
@@ -15,6 +16,9 @@ export default function Map() {
     const [zoom] = useState(11);
     const [selectedEthnicity, setSelectedEthnicity] = useState('perc_aapi');
     const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
+    const [hoveredFeature, setHoveredFeature] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
     const boston = {lng: -71.0589, lat: 42.3601};
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
     const ethnicityColorMapping = {
@@ -24,6 +28,83 @@ export default function Map() {
         // perc_hispanic: '#EC9192', // Pink
         perc_other: '#EC9192', // Grey
         perc_two_or_more: '#000' // Grey for multiracial and two or more (or define another color)
+    };
+
+    useEffect(() => {
+        if (!map.current || !geojsonData) return;
+
+        // Add event listener for mouseenter to each neighborhood feature
+        map.current.on('mouseenter', 'neighborhoods-fill', handleMouseEnter);
+        // Add event listener for mouseleave to each neighborhood feature
+        map.current.on('mouseleave', 'neighborhoods-fill', handleMouseLeave);
+
+        return () => {
+            // Remove event listeners when component unmounts
+            map.current.off('mouseenter', 'neighborhoods-fill', handleMouseEnter);
+            map.current.off('mouseleave', 'neighborhoods-fill', handleMouseLeave);
+        };
+    }, [geojsonData]);
+
+    const handleMouseEnter = (event) => {
+        console.log("handle mouse enter");
+        if (!event.features || event.features.length === 0) {
+            console.error('No features available in the event');
+            return;
+        }
+
+        const properties = event.features[0].properties;
+        const featureId = event.features[0].id;
+        setHoveredFeature(properties);
+        setMousePosition({ x: event.point.x, y: event.point.y });
+
+        // Darken the color of the hovered feature
+        const originalColor = properties.color; // This assumes that color is stored in properties
+        const darkenedColor = tinycolor(originalColor).darken(10).toString(); // Adjust the darken value as needed
+        console.log("Setting hover color for feature:", featureId, darkenedColor);
+
+        map.current.setFeatureState(
+            { source: 'neighborhoods', id: event.features[0].id },
+            { hoverColor: darkenedColor }
+        );
+    };
+
+    const handleMouseLeave = (event) => {
+        console.log("handle mouse leave");
+        // Only reset hover state if there's a currently hovered feature
+        if (hoveredFeature && hoveredFeature.id) {
+            map.current.setFeatureState(
+                { source: 'neighborhoods', id: hoveredFeature.id },
+                { hoverColor: null }
+            );
+        }
+
+        // Clear the hovered feature state
+        setHoveredFeature(null);
+    };
+
+// Render a hover box if a feature is hovered
+    const renderHoverBox = () => {
+        console.log("in render hoverbox");
+        if (!hoveredFeature) return null;
+
+        // Extract information from CSV based on the hovered feature data
+        const neighborhoodData = csvData.find(d => d.Neighborhood === hoveredFeature.blockgr2020_ctr_neighb_name);
+        const hoveredEthnicityValue = neighborhoodData ? neighborhoodData[selectedEthnicity] : 'Data not available';
+        console.log("nd", neighborhoodData);
+        console.log("sE", selectedEthnicity, "HD", hoveredEthnicityValue);
+        const style = {
+            left: `${mousePosition.x + 10}px`, // 10px to the right of the cursor
+            top: `${mousePosition.y + 10}px`  // 10px below the cursor
+        };
+        return (
+            <div className="hover-box" style={style}>
+                <h3>{hoveredFeature.blockgr2020_ctr_neighb_name}</h3>
+                {hoveredEthnicityValue && <p>{selectedEthnicity}: {hoveredEthnicityValue}</p>}
+                {neighborhoodData && neighborhoodData.corp_own_rate && <p>Corporate Ownership Rate: {neighborhoodData.corp_own_rate}</p>}
+                {neighborhoodData && neighborhoodData.own_occ_rate && <p>Owner Occupation Rate: {neighborhoodData.own_occ_rate}</p>}
+                <p>Reach out to your city government to learn more about your housing laws: <a href="link to city government">link</a>!</p>
+            </div>
+        );
     };
 
     useEffect(() => {
@@ -90,7 +171,8 @@ export default function Map() {
 
         const baseColor = ethnicityColorMapping[selectedEthnicity] || '#FFFFFF';
 
-        geojsonData.features.forEach(feature => {
+        geojsonData.features.forEach((feature, index) => {
+            feature.id = feature.id || index;
             const neighborhoodData = csvData.find(d =>
                 d.Neighborhood === feature.properties.blockgr2020_ctr_neighb_name);
             feature.properties.value = neighborhoodData ? parseFloat(neighborhoodData[selectedEthnicity]) : 0;
@@ -101,7 +183,8 @@ export default function Map() {
         // Add the source for neighborhoods
         map.current.addSource('neighborhoods', {
             type: 'geojson',
-            data: geojsonData
+            data: geojsonData,
+            promoteId: 'id'
         });
 
         // Add layer for coloring
@@ -109,8 +192,17 @@ export default function Map() {
             id: 'neighborhoods-fill',
             type: 'fill',
             source: 'neighborhoods',
+            // paint: {
+            //     'fill-color': ['get', 'color'], // Use color property from features
+            //     'fill-opacity': 0.75
+            // }
             paint: {
-                'fill-color': ['get', 'color'], // Use color property from features
+                'fill-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hoverColor'], false],
+                    ['feature-state', 'hoverColor'],
+                    ['get', 'color']
+                ],
                 'fill-opacity': 0.75
             }
         });
@@ -165,6 +257,7 @@ export default function Map() {
             </select>
             <div ref={mapContainer} className="map"/>
             <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
+            {hoveredFeature ? renderHoverBox() : null}
         </div>
 
     );

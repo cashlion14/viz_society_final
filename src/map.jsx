@@ -47,7 +47,7 @@ export default function Map() {
             map.current.off('mousemove', 'neighborhoods-fill', handleMouseMove);
             map.current.off('mouseleave', 'neighborhoods-fill', handleMouseLeave);
         };
-    }, [geojsonData]);
+    }, [geojsonData,map.current]);
 
     useEffect(() => {
         if (csvData && csvData.length > 0) { // Ensure csvData is loaded and is not empty
@@ -76,29 +76,6 @@ export default function Map() {
         if (!map.current || !geojsonData || !csvData) return; // Ensure the map and data are loaded
         addNeighborhoodsLayer(selectedEthnicity, geojsonData, specificYearData);
     }, [selectedEthnicity, geojsonData, csvData, specificYearData]); // Re-run when ethnicity or data changes
-
-    // const handleMouseEnter = (event) => {
-    //     console.log("handle mouse enter");
-    //     if (!event.features || event.features.length === 0) {
-    //         console.error('No features available in the event');
-    //         return;
-    //     }
-    //
-    //     const properties = event.features[0].properties;
-    //     const featureId = event.features[0].id;
-    //     setHoveredFeature(properties);
-    //     setMousePosition({ x: event.point.x, y: event.point.y });
-    //
-    //     // Darken the color of the hovered feature
-    //     const originalColor = properties.color; // This assumes that color is stored in properties
-    //     const darkenedColor = tinycolor(originalColor).darken(10).toString(); // Adjust the darken value as needed
-    //     console.log("Setting hover color for feature:", featureId, darkenedColor);
-    //
-    //     map.current.setFeatureState(
-    //         { source: 'neighborhoods', id: event.features[0].id },
-    //         { hoverColor: darkenedColor }
-    //     );
-    // };
 
     const handleMouseMove = (event) => {
         if (!event.features || event.features.length === 0) {
@@ -143,21 +120,10 @@ export default function Map() {
                 { hoverColor: null }
             );
             setHoveredFeature(null);
+            setMousePosition({ x: 0, y: 0 });
         }
     };
-    // const handleMouseLeave = (event) => {
-    //     console.log("handle mouse leave");
-    //     // Only reset hover state if there's a currently hovered feature
-    //     if (hoveredFeature && hoveredFeature.id) {
-    //         map.current.setFeatureState(
-    //             { source: 'neighborhoods', id: hoveredFeature.id },
-    //             { hoverColor: null }
-    //         );
-    //     }
-    //
-    //     // Clear the hovered feature state
-    //     setHoveredFeature(null);
-    // };
+
     const fetchData = () => {
         fetch('/data/Boston_Neighborhoods.geojson')
             .then(response => response.json())
@@ -369,6 +335,7 @@ export default function Map() {
     function clearInformationDisplay() {
         // Clear the information display
         console.log('Clearing display info');
+        setHoveredFeature(null);
     }
 
     return (

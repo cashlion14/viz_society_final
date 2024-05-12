@@ -32,6 +32,8 @@ export default function Map() {
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
 
     const ethnicityColorMapping = {
+        corp_own_rate: '#E230A8',
+        own_occ_rate: '#1a1',
         perc_white: '#A72608', // Red
         perc_black: '#566C2C', // Light green
         perc_aapi: '#3A481E', // Green
@@ -317,6 +319,8 @@ export default function Map() {
         <div className="map-wrap">
             <select className="map-overlay" value={selectedEthnicity}
                     onChange={e => setSelectedEthnicity(e.target.value)}>
+                <option value="corp_own_rate">Corporation Ownership Rate</option>
+                <option value="own_occ_rate">Ownership Occupation Rate</option>
                 <option value="perc_aapi">Percentage AAPI</option>
                 <option value="perc_black">Percentage Black</option>
                 <option value="perc_white">Percentage White</option>
@@ -324,7 +328,7 @@ export default function Map() {
                 <option value="perc_two_or_more">Percentage Two or More</option>
             </select>
             <div ref={mapContainer} className="map"/>
-            <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'} maxVal={maxEthnicityValue}/>
+            <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'}/>
             <div className="flex-container" style={{
                 display: 'flex',       // Enables flexbox layout
                 alignItems: 'center', // Vertically aligns items in the center

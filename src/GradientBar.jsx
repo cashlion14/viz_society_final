@@ -1,10 +1,9 @@
-export function GradientBar({ color, maxVal }) {
+export function GradientBar({ color }) {
     const gradientCSS = `linear-gradient(to top, #ffffff, ${color})`;
-    const roundedMaxVal = maxVal.toFixed(2);
     return (
         <div className="gradient-bar-container">
             <div className="gradient-bar" style={{ background: gradientCSS }}>
-                <span style={{color: "white"}}>{roundedMaxVal}</span>
+                <span style={{color: "white"}}>{1}</span>
                 <span style={{color: "black"}}>0</span>
             </div>
             <style jsx>{`

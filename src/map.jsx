@@ -9,7 +9,7 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 import HoverBox from "./hoverBox";
 
-export default function Map() {
+export default function Map({ onNeighborhoodHover }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [geojsonData, setGeojsonData] = useState(null);
@@ -134,6 +134,8 @@ export default function Map() {
             );
 
             setHoveredFeature({...newHoveredFeature.properties, id: featureId});
+            console.log("NHF:", newHoveredFeature)
+            onNeighborhoodHover(newHoveredFeature.properties);
         }
 
         setMousePosition({x: event.point.x, y: event.point.y});
@@ -225,7 +227,6 @@ export default function Map() {
                         {source: 'neighborhoods', id: hoveredNeighborhoodId},
                         {hover: true}
                     );
-                    updateInformationDisplay(e.features[0].properties);
                 }
             }
         });
@@ -304,19 +305,13 @@ export default function Map() {
         }
     }
 
-    function updateInformationDisplay(properties) {
-        // Update the display with information from the hovered neighborhood
-        console.log('Displaying info for:', properties);
-    }
 
     function clearInformationDisplay() {
-        // Clear the information display
-        console.log('Clearing display info');
         setHoveredFeature(null);
     }
 
     return (
-        <div className="map-wrap">
+            <div className="map-wrap">
             <select className="map-overlay" value={selectedEthnicity}
                     onChange={e => setSelectedEthnicity(e.target.value)}>
                 <option value="corp_own_rate">Corporation Ownership Rate</option>
@@ -332,7 +327,7 @@ export default function Map() {
             <div className="flex-container" style={{
                 display: 'flex',       // Enables flexbox layout
                 alignItems: 'center', // Vertically aligns items in the center
-                marginLeft: '220px'
+                marginLeft: '235px'
             }}>
                 <button onClick={handlePlayPause} style={{
                     marginTop: '5px',  // Adds space between button and slider
@@ -356,7 +351,7 @@ export default function Map() {
                 specificYearData={specificYearData}
                 selectedEthnicity={selectedEthnicity}
             />
-        </div>
+            </div>
 
     );
 }

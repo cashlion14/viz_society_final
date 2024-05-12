@@ -1,16 +1,15 @@
 /* Ensuring the map fills the designated area within visualizations */
+
 .visualizations .primary-viz-content .map-wrap {
-    position: relative;
-    width: 100%; /* Full width of the container */
-    height: 100%; /* Full height of the container */
+    position: relative; /* Ensures position context for the absolute map */
+    height: 100%; /* Fills the height of its parent */
+    width: 100%; /* Fills the width of its parent */
 }
 
-.visualizations .primary-viz-content .map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+.map {
     height: 100%;
+    width: 100%;
+    position: absolute; /* Ensures the map fills the container completely */
 }
 
 .flex-container {

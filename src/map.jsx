@@ -4,66 +4,25 @@ import {csvParse} from 'd3-dsv';
 import {scaleSequential} from 'd3-scale';
 import {interpolateRgb} from 'd3-interpolate';
 import {GradientBar} from './GradientBar';
-import TimeSlider from './timeSlider';
 import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 import HoverBox from "./hoverBox";
 
-export default function Map({ onNeighborhoodHover }) {
+export default function Map({ onNeighborhoodHover, ethnicityColorMapping,selectedEthnicity,setSelectedEthnicity, selectedYear ,setSelectedYear}) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [geojsonData, setGeojsonData] = useState(null);
     const [csvData, setCsvData] = useState(null);
     const [specificYearData, setSpecificYearData] = useState(null);
     const [zoom] = useState(12);
-    const [selectedEthnicity, setSelectedEthnicity] = useState('perc_white');
-    const [maxEthnicityValue, setMaxEthnicityValue] = useState(0);
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
-    const [selectedYear, setSelectedYear] = useState(2020);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const timerRef = useRef();
-    const dataLength = 2050 - 2004 + 1;
     const boston = {lng: -71.0589, lat: 42.3601};
     const bostonBounds = [
         [-71.291421, 42.127797],  // Southwest coordinates
         [-70.886004, 42.499542]   // Northeast coordinates
     ];
     maptilersdk.config.apiKey = '37cqcVAKPgwCo3fuGPSy';
-
-    const ethnicityColorMapping = {
-        corp_own_rate: '#E230A8',
-        own_occ_rate: '#1a1',
-        perc_white: '#A72608', // Red
-        perc_black: '#566C2C', // Light green
-        perc_aapi: '#3A481E', // Green
-        // perc_hispanic: '#EC9192', // Pink
-        perc_other: '#EC9192', // Grey
-        perc_two_or_more: '#000' // Grey for multiracial and two or more (or define another color)
-    };
-
-    const handlePlayPause = () => {
-        setIsPlaying(!isPlaying);
-    };
-
-    useEffect(() => {
-        if (isPlaying) {
-            timerRef.current = setInterval(() => {
-                setSelectedYear(prevYear => {
-                    let nextYear = prevYear + 1;
-                    if (nextYear > 2050) {
-                        nextYear = 2004;  // Loop back to start
-                    }
-                    // updateMapForYear(nextYear);
-                    return nextYear;
-                });
-            }, 700); // Change the year every second
-        } else {
-            clearInterval(timerRef.current);
-        }
-
-        return () => clearInterval(timerRef.current);
-    }, [isPlaying]);
 
     useEffect(() => {
         if (!map.current || !geojsonData) return;
@@ -189,7 +148,6 @@ export default function Map({ onNeighborhoodHover }) {
         const values = specificYearData.map(d => parseFloat(d[selectedEthnicity]));
         const minValue = Math.min(...values);
         const maxValue = Math.max(...values);
-        setMaxEthnicityValue(maxValue);
 
         const baseColor = ethnicityColorMapping[selectedEthnicity] || '#FFFFFF';
 
@@ -316,35 +274,9 @@ export default function Map({ onNeighborhoodHover }) {
                     onChange={e => setSelectedEthnicity(e.target.value)}>
                 <option value="corp_own_rate">Corporation Ownership Rate</option>
                 <option value="own_occ_rate">Ownership Occupation Rate</option>
-                <option value="perc_aapi">Percentage AAPI</option>
-                <option value="perc_black">Percentage Black</option>
-                <option value="perc_white">Percentage White</option>
-                <option value="perc_other">Percentage Other</option>
-                <option value="perc_two_or_more">Percentage Two or More</option>
             </select>
             <div ref={mapContainer} className="map"/>
             <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'}/>
-            <div className="flex-container" style={{
-                display: 'flex',       // Enables flexbox layout
-                alignItems: 'center', // Vertically aligns items in the center
-                marginLeft: '235px'
-            }}>
-                <button onClick={handlePlayPause} style={{
-                    marginTop: '5px',  // Adds space between button and slider
-                    padding: '5px 15px', // Adjusts padding for better visual appeal
-                    fontSize: '16px',     // Ensures text size is appropriate
-                    cursor: 'pointer',     // Changes cursor to pointer on hover
-                    zIndex: 1000
-                }}>
-                    {isPlaying ? 'Pause' : 'Play'}
-                </button>
-                <TimeSlider
-                    selectedYear={selectedYear}
-                    setSelectedYear={setSelectedYear}
-                    ethnicityColorMapping={ethnicityColorMapping}
-                    selectedEthnicity={selectedEthnicity}
-                />
-            </div>
             <HoverBox
                 hoveredFeature={hoveredFeature}
                 mousePosition={mousePosition}

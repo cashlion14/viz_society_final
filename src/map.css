@@ -32,16 +32,3 @@
     border: 1px solid black;
     z-index: 1000;  /* High z-index to ensure it appears on top*/
 }
-
-.year-slider {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    width: 300px;
-}
-
-.slider {
-    width: 100%;
-}

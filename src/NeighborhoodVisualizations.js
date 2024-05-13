@@ -19,7 +19,7 @@ const NeighborhoodVisualizations = ({data}) => {
         }
 
         if (!data) {
-            return <div>No Data Available</div>;
+            return <div>Hover over a neighborhood to explore the ethnicities and racial groups that live there.</div>;
         }
         console.log("JIJIJ", data);
         const getDotsForEthnicity = (value, color) => {

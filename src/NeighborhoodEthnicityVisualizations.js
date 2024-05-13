@@ -27,22 +27,47 @@ const NeighborhoodEthnicityVisualizations = ({ethnicityColorMapping, data}) => {
         console.log("TOTAL", total);
         const getDotsForEthnicities = () => {
             const dots = [];
-            for (const [key, value] of Object.entries(data).filter(([key, _]) => ethnicityColorMapping.hasOwnProperty(key))) {
-                const color = ethnicityColorMapping[key];
-                const dotCount = Math.round((parseFloat(value, 10) / total) * 100);
-                for (let i = 0; i < dotCount; i++) {
-                    dots.push(<div key={key + '-' + i} style={{
-                        width: '25px',
-                        height: '25px',
-                        borderRadius: '50%',
-                        backgroundColor: color,
-                        margin: '1px',
-                        display: 'inline-block'
-                    }}/>);
-                }
+            let totalDots = 0;
+            const entries = Object.entries(data)
+                .filter(([key, _]) => ethnicityColorMapping.hasOwnProperty(key));
+
+            const dotCounts = entries.map(([key, value]) => {
+                const proportion = parseFloat(value) / total;
+                const dotCount = Math.floor(proportion * 100);
+                totalDots += dotCount;
+                return {key, dotCount, remainder: (proportion * 100) - dotCount};
+            });
+
+            // Adjust for rounding errors by adding dots to entries with the largest remainders until we reach 100
+            const remaindersSorted = dotCounts.sort((a, b) => b.remainder - a.remainder);
+            for (let i = 0; totalDots < 100; i++, totalDots++) {
+                remaindersSorted[i % remaindersSorted.length].dotCount++;
             }
+
+            const sortedDotCounts = dotCounts.sort((a, b) => {
+                const keys = Object.keys(ethnicityColorMapping);
+                return keys.indexOf(a.key) - keys.indexOf(b.key);
+            });
+
+            // Generate the dot elements
+            sortedDotCounts.forEach(({key, dotCount}) => {
+                const color = ethnicityColorMapping[key];
+                for (let i = 0; i < dotCount; i++) {
+                    dots.push(
+                        <div key={`${key}-${i}`} style={{
+                            width: '25px',
+                            height: '25px',
+                            borderRadius: '50%',
+                            backgroundColor: color,
+                            margin: '1px',
+                            display: 'inline-block'
+                        }}/>
+                    );
+                }
+            });
             return dots;
         };
+
 
         return (
             <div>

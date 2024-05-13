@@ -25,9 +25,9 @@ const Visualizations = () => {
 
     const scenarioColorMapping =
         {
-            pessimistic: 'darkred',
-            realistic: 'gold',
-            optimistic: 'forestgreen'
+            pessimistic: '#470000',
+            realistic: '#473f00',
+            optimistic: '#003309'
         };
 
     const handleNeighborhoodHover = (data) => {

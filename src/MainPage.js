@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './utilities.css'
 import Visualizations from './Visualizations.js'
 import About from './About.js'
+import Takeaways from './Takeaways.js'
 import React, { useState } from "react";
 
 const MainPage = () => {
@@ -15,6 +16,7 @@ const MainPage = () => {
         <div className="main">
           {activePage === 'visualizations' && <Visualizations />}
           {activePage === 'about' && <About />}
+          {activePage === 'takeaways' && <Takeaways />}
         </div>
     </div>
   );

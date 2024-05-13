@@ -21,6 +21,7 @@ function NavBar({ setActivePage }) {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link onClick={() => setActivePage('visualizations')}><h5>Visualizations</h5></Nav.Link>
+            <Nav.Link onClick={() => setActivePage('takeaways')}><h5>Takeaways</h5></Nav.Link>
             <Nav.Link onClick={() => setActivePage('about')}><h5>About</h5></Nav.Link>
           </Nav>
         </Navbar.Collapse>

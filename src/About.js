@@ -14,7 +14,7 @@ const About = () => {
 
                 <div style={{maxWidth: '400px', marginLeft: '100px'}}>
                     <h1 style={{ marginBottom: '20px' }}>Acknowledgements</h1>
-                    <p>We would like to thank the Metropolitan Area Planning Council (MAPC) for their willingness to share data with us, and for making this project possible. Barring their high-quality data, this project would not have been possible. </p>
+                    <p>This project was developed with guidance and feedback from the <a href="https://www.mapc.org/">Metropolitan Area Planning Commission (MAPC)</a>. Without their guidance and data, this project would not have been possible. For our data, we used information from ACS 2020-2023 and Census 2020. </p>
                     <p>Furthermore, we would like to sincerely extend our appreciation to the entire 6.C85 course staff. They have been incredibly helpful throughout this entire process, and this journey would not have been possible without their guidance every step of the way. Thank you for all of your help and support!</p>
                 </div>
             </div>

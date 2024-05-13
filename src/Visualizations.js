@@ -11,16 +11,17 @@ const Visualizations = () => {
     const [selectedYear, setSelectedYear] = useState(2025);
     const [selectedDropdownFeature, setSelectedDropdownFeature] = useState('corp_own_rate');
     const [selectedState, setSelectedState] = useState('realistic');
+    const [specificYearData, setSpecificYearData] = useState(null);
+
     const ethnicityColorMapping = {
-        corp_own_rate: 'forestgreen',
-        own_occ_rate: 'gold',
         perc_white: '#A72608', // Red
         perc_black: '#566C2C', // Light green
         perc_aapi: '#3A481E', // Green
-        // perc_hispanic: '#EC9192', // Pink
-        perc_other: '#EC9192', // Grey
-        perc_two_or_more: '#000' // Grey for multiracial and two or more (or define another color)
+        perc_hisp: '#EC9192', // Pink
+        perc_other: '#D9D9D9', // Grey
+        perc_two_or_more: '#D9D9D9' // Grey for multiracial and two or more (or define another color)
     };
+
     const scenarioColorMapping =
         {
             pessimistic: 'darkred',
@@ -31,6 +32,9 @@ const Visualizations = () => {
     const handleNeighborhoodHover = (data) => {
         setHoveredData(data);
     };
+    const neighborhoodData = hoveredData && specificYearData && specificYearData.find(data =>
+        data.Neighborhood === hoveredData.properties?.blockgr2020_ctr_neighb_name
+    );
 
     return (
         <div>
@@ -59,10 +63,14 @@ const Visualizations = () => {
                          selectedYear={selectedYear}
                          setSelectedYear={setSelectedYear}
                          selectedState={selectedState}
+                         specificYearData={specificYearData}
+                         setSpecificYearData={setSpecificYearData}
                     />
                 </div>
                 <div className="secondary-viz-content">
-                    <NeighborhoodEthnicityVisualizations data={hoveredData}/>
+                    <NeighborhoodEthnicityVisualizations
+                        ethnicityColorMapping={ethnicityColorMapping}
+                        data={neighborhoodData}/>
                 </div>
             </div>
         </div>

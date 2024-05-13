@@ -9,6 +9,9 @@ import {
   Page6,
   Page7,
   Page8,
+  Page9,
+  Page10,
+  Page11,
 } from "./Scrollytelling";
 import "./utilities.css";
 import "./App.css";
@@ -39,8 +42,14 @@ function App() {
         setActiveIndex(7);
       } else if (scrollPosition < 8 * windowHeight - scrollThreshold) {
         setActiveIndex(8);
-      } else {
+      } else if (scrollPosition < 9 * windowHeight - scrollThreshold) {
         setActiveIndex(9);
+      } else if (scrollPosition < 10 * windowHeight - scrollThreshold) {
+        setActiveIndex(10);
+      } else if (scrollPosition < 11 * windowHeight - scrollThreshold) {
+        setActiveIndex(12);
+      } else {
+        setActiveIndex(12);
       }
     };
 
@@ -79,6 +88,15 @@ function App() {
       </div>
       <div className={activeIndex === 9 ? "component active" : "component"}>
           <Component9 />
+      </div>
+      <div className={activeIndex === 10 ? "component active" : "component"}>
+          <Component10 />
+      </div>
+      <div className={activeIndex === 11 ? "component active" : "component"}>
+          <Component11 />
+      </div>
+      <div className={activeIndex === 12 ? "component active" : "component"}>
+          <Component12 />
       </div>
     </div>
   );
@@ -151,9 +169,32 @@ const Component8 = () => {
 const Component9 = () => {
   return (
     <div>
-      <MainPage />
+      <Page9 />
     </div>
   );
 };
 
+
+const Component10 = () => {
+  return (
+    <div>
+      <Page10 />
+    </div>
+  );
+};
+const Component11 = () => {
+  return (
+    <div>
+      <Page11 />
+    </div>
+  );
+};
+
+const Component12 = () => {
+  return (
+    <div>
+      <MainPage />
+    </div>
+  );
+};
 export default App;

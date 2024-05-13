@@ -13,6 +13,7 @@ const Visualizations = () => {
     const [selectedState, setSelectedState] = useState('realistic');
     const [specificYearData, setSpecificYearData] = useState(null);
 
+    //TODO: change colors
     const ethnicityColorMapping = {
         perc_white: '#A72608', // Red
         perc_black: '#566C2C', // Light green

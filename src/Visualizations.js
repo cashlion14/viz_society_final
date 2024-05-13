@@ -17,7 +17,7 @@ const Visualizations = () => {
     const ethnicityColorMapping = {
         perc_white: '#A72608', // Red
         perc_black: '#566C2C', // Light green
-        perc_aapi: '#3A481E', // Green
+        perc_aapi: '#373F51', // Green
         perc_hisp: '#EC9192', // Pink
         perc_other: '#D9D9D9', // Grey
         perc_two_or_more: '#D9D9D9' // Grey for multiracial and two or more (or define another color)

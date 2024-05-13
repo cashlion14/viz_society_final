@@ -105,7 +105,7 @@ export const Page4 = () => {
         <img src={correlations} alt="Correlations between Corporate Ownership and Race" style={{ width: '45%', height: 'auto' }} />
       </div>
       <p style={{ overflowWrap: 'break-word', textAlign: 'right', marginTop: '18px' }}>
-        Corporate ownership has been steadily rising since 2005. There is also a strong correlation between demographics and corporate ownership rates. We seek to answer the question:
+        Corporate ownership has been steadily rising since 2005. There is also a strong correlation between certain demographics and corporate ownership rates. We seek to answer the question:
       </p>
       <h1 style={{ overflowWrap: 'break-word', textAlign: 'right', marginTop: '18px', fontSize: '30px'}}>
         <b>If trends in corporate ownership rates (CORs) continue, what would the demographics of Boston look like?</b>
@@ -133,19 +133,23 @@ export const Page5 = () => {
   );
 };
 
+
 export const Page6 = () => {
   return (
     <div className="main" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
 
       <div style={{ flex: '1', overflowWrap: 'break-word', textAlign: 'center', marginTop: '18px' }}>
         <h1>
-          We used projections of CORs to predict what Boston may look like in the future.
+        We used projections of CORs to predict what Boston may look like in the future.
         </h1>
-        <p style={{ color: '#EC9192' }}>
-          It's important to note - <b>these are speculations based on a limited set of variables</b> - but they are a very possible reality
+        <p style={{ color: '#e6a3a4' }}>
+          Note: These predictions are based on a limited number of factors and are speculative.
         </p>
         <p style={{ color: '#EC9192' }}>
-          We included optimistic (CORs rising slower than expected), pessimistic (CORs rising faster than expected), and realistic projections to capture the future's uncertainty.
+          We present three scenarios: optimistic (slower growth in corporate ownership rates), pessimistic (faster growth), and realistic projections to capture the future's uncertainty.
+        </p>
+        <p style={{ color: '#e07072' }}>
+          We use historical data linking demographics and CORs. While this relationship may not be causal, this graphic is a thought experiment that explores what Boston might look like if it were.
         </p>
       </div>
 
@@ -157,7 +161,6 @@ export const Page6 = () => {
     </div>
   );
 };
-
 
 export const Page7 = () => {
   return (

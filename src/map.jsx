@@ -8,12 +8,20 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 import HoverBox from "./hoverBox";
 
-export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedEthnicity,setSelectedEthnicity, selectedYear, selectedState}) {
+export default function Map({
+                                scenarioColorMapping,
+                                onNeighborhoodHover,
+                                selectedEthnicity,
+                                setSelectedEthnicity,
+                                selectedYear,
+                                selectedState,
+                                specificYearData,
+                                setSpecificYearData
+                            }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [geojsonData, setGeojsonData] = useState(null);
     const [csvData, setCsvData] = useState(null);
-    const [specificYearData, setSpecificYearData] = useState(null);
     const [zoom] = useState(11);
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
@@ -41,7 +49,7 @@ export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedE
 
     useEffect(() => {
         if (csvData && csvData.length > 0) { // Ensure csvData is loaded and is not empty
-            const filteredData = csvData.filter(d => d.Year === String(selectedYear) && d.Scenario ===selectedState);
+            const filteredData = csvData.filter(d => d.Year === String(selectedYear) && d.Scenario === selectedState);
             console.log("CSV", selectedYear, "Data:", filteredData);
             setSpecificYearData(filteredData);
         }
@@ -93,8 +101,8 @@ export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedE
             );
 
             setHoveredFeature({...newHoveredFeature.properties, id: featureId});
-            console.log("NHF:", newHoveredFeature)
-            onNeighborhoodHover(newHoveredFeature.properties);
+            console.log("NHF:", newHoveredFeature);
+            onNeighborhoodHover(newHoveredFeature);
         }
 
         setMousePosition({x: event.point.x, y: event.point.y});
@@ -132,7 +140,7 @@ export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedE
                         console.log("CSV Data:", parsedCsvData);
                         console.log("Geo Data:", data);
                         setCsvData(parsedCsvData);
-                        const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear) && d.Scenario ===selectedState);
+                        const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear) && d.Scenario === selectedState);
                         console.log("CSV 2025 Data:", filteredData);
                         setSpecificYearData(filteredData);
                     });
@@ -268,7 +276,7 @@ export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedE
     }
 
     return (
-            <div className="map-wrap">
+        <div className="map-wrap">
             <select className="map-overlay" value={selectedEthnicity}
                     onChange={e => setSelectedEthnicity(e.target.value)}>
                 <option value="corp_own_rate">Corporation Ownership Rate</option>
@@ -282,7 +290,7 @@ export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedE
                 specificYearData={specificYearData}
                 selectedEthnicity={selectedEthnicity}
             />
-            </div>
+        </div>
 
     );
 }

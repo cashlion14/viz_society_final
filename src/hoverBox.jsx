@@ -12,10 +12,8 @@ const HoverBox = ({ hoveredFeature, mousePosition, specificYearData, selectedEth
     return (
         <div className="hover-box" style={style}>
             <h3>{hoveredFeature.blockgr2020_ctr_neighb_name}</h3>
-            <p>{selectedEthnicity}: {neighborhoodData && neighborhoodData[selectedEthnicity] ? neighborhoodData[selectedEthnicity] : 'Uncertain'}</p>
-            <p>Corporate Ownership Rate: {neighborhoodData && neighborhoodData.corp_own_rate ? neighborhoodData.corp_own_rate : 'Uncertain'}</p>
-            <p>Owner Occupation Rate: {neighborhoodData && neighborhoodData.own_occ_rate ? neighborhoodData.own_occ_rate : 'Uncertain'}</p>
-            <p>Reach out to your city government to learn more about your housing laws: <a href="link to city government">link</a>!</p>
+            <p>Corporate Ownership Rate: {neighborhoodData && neighborhoodData.corp_own_rate ? `${Math.round(neighborhoodData.corp_own_rate*100)/100} %` : 'Uncertain'}</p>
+            <p>Owner Occupation Rate: {neighborhoodData && neighborhoodData.own_occ_rate ? `${Math.round(neighborhoodData.own_occ_rate*100)/100} %`: 'Uncertain'}</p>
         </div>
     );
 };

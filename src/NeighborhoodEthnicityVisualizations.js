@@ -73,7 +73,7 @@ const NeighborhoodEthnicityVisualizations = ({ethnicityColorMapping, data}) => {
             <div>
                 <h2>{data.Neighborhood} Information</h2>
                 <div style={{marginBottom: '5px', textAlign: 'left', color: 'white'}}>
-                    <b>2020 ETHNICITY BREAKDOWN:</b>
+                    <b>ETHNICITY BREAKDOWN:</b>
                     <p>Each dot represents 1% of the population within {data.Neighborhood}'s
                         neighborhood.</p>
                 </div>

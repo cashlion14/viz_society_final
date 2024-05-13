@@ -22,7 +22,6 @@ export default function Map({
     const map = useRef(null);
     const [geojsonData, setGeojsonData] = useState(null);
     const [csvData, setCsvData] = useState(null);
-    // const [specificYearData, setSpecificYearData] = useState(null);
     const [zoom] = useState(11);
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({x: 0, y: 0});

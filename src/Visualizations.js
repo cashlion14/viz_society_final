@@ -37,41 +37,41 @@ const Visualizations = () => {
     );
 
     return (
-        <div>
-            <div className="viz-controls"
-                 style={{
-                     display: 'flex',        // Use flexbox to align children inline
-                     justifyContent: 'left', // Horizontally center the content
-                     gap: '20px'             // Space between the TimeSlider and SelectStateButtons
-                 }}>
-                <TimeSlider
-                    selectedYear={selectedYear}
-                    setSelectedYear={setSelectedYear}
-                    scenarioColorMapping={scenarioColorMapping}
-                    selectedState={selectedState}
-                />
-                <SelectStateButtons
-                    selectedState={selectedState} setSelectedState={setSelectedState}
-                    scenarioColorMapping={scenarioColorMapping}/>
-            </div>
-            <div className="visualizations">
+        <div className="visualizations">
+            <div>
+                <div className="viz-controls"
+                style={{
+                    display: 'flex',        // Use flexbox to align children inline
+                    justifyContent: 'left', // Horizontally center the content
+                    gap: '20px'             // Space between the TimeSlider and SelectStateButtons
+                }}>
+                    <TimeSlider
+                        selectedYear={selectedYear}
+                        setSelectedYear={setSelectedYear}
+                        scenarioColorMapping={scenarioColorMapping}
+                        selectedState={selectedState}
+                    />
+                    <SelectStateButtons
+                        selectedState={selectedState} setSelectedState={setSelectedState}
+                        scenarioColorMapping={scenarioColorMapping}/>
+                </div>
                 <div className="primary-viz-content">
                     <Map onNeighborhoodHover={handleNeighborhoodHover}
-                         scenarioColorMapping={scenarioColorMapping}
-                         selectedEthnicity={selectedDropdownFeature}
-                         setSelectedEthnicity={setSelectedDropdownFeature}
-                         selectedYear={selectedYear}
-                         setSelectedYear={setSelectedYear}
-                         selectedState={selectedState}
-                         specificYearData={specificYearData}
-                         setSpecificYearData={setSpecificYearData}
+                            scenarioColorMapping={scenarioColorMapping}
+                            selectedEthnicity={selectedDropdownFeature}
+                            setSelectedEthnicity={setSelectedDropdownFeature}
+                            selectedYear={selectedYear}
+                            setSelectedYear={setSelectedYear}
+                            selectedState={selectedState}
+                            specificYearData={specificYearData}
+                            setSpecificYearData={setSpecificYearData}
                     />
                 </div>
-                <div className="secondary-viz-content">
-                    <NeighborhoodEthnicityVisualizations
-                        ethnicityColorMapping={ethnicityColorMapping}
-                        data={neighborhoodData}/>
-                </div>
+            </div>
+            <div className="secondary-viz-content">
+                <NeighborhoodEthnicityVisualizations
+                    ethnicityColorMapping={ethnicityColorMapping}
+                    data={neighborhoodData}/>
             </div>
         </div>
     )

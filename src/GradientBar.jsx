@@ -12,7 +12,7 @@ export function GradientBar({ color }) {
                     top: 150px; /* Adjust top position as needed */
                     right: 0px; /* Adjust right position as needed */
                     display: flex;
-                    height: 500px; /* Ensure the minimum height is 300px */
+                    height: 300px; /* Ensure the minimum height is 300px */
                     flex-direction: column;
                     align-items: center;
                     padding: 10px;

@@ -1,8 +1,7 @@
 import './utilities.css'
 import React, {useEffect, useRef, useState} from 'react';
 
-const TimeSlider = ({selectedYear, setSelectedYear, ethnicityColorMapping, selectedEthnicity}) => {
-    console.log("TIMESLIDER", selectedYear)
+const TimeSlider = ({selectedYear, setSelectedYear, scenarioColorMapping, selectedState}) => {
     const timerRef = useRef();
     const [isPlaying, setIsPlaying] = useState(false);
     const handlePlayPause = () => {
@@ -10,12 +9,11 @@ const TimeSlider = ({selectedYear, setSelectedYear, ethnicityColorMapping, selec
     };
     useEffect(() => {
         if (isPlaying) {
-            console.log("YEAR:", selectedYear);
             timerRef.current = setInterval(() => {
                 setSelectedYear(prevYear => {
                     let nextYear = prevYear + 1;
                     if (nextYear > 2050) {
-                        nextYear = 2004;  // Loop back to start
+                        nextYear = 2025;  // Loop back to start
                     }
                     // updateMapForYear(nextYear);
                     return nextYear;
@@ -33,7 +31,7 @@ const TimeSlider = ({selectedYear, setSelectedYear, ethnicityColorMapping, selec
                 fontSize: '20px',
                 fontWeight: 'bold',
                 marginBottom: '0px',
-                backgroundColor: ethnicityColorMapping[selectedEthnicity] || '#FFFFFF',
+                backgroundColor: scenarioColorMapping[selectedState] || '#FFFFFF',
                 width: '100%',  // Ensure the label spans the full width
                 textAlign: 'center' // Center text for better visual alignment
             }}>
@@ -51,7 +49,7 @@ const TimeSlider = ({selectedYear, setSelectedYear, ethnicityColorMapping, selec
                 </button>
                 <input type="range"
                        style={{ width: '100%', height: '25px', flexGrow: 1, marginLeft: '10px' }} // Ensure slider takes the remaining space
-                       min="2004"
+                       min="2025"
                        max="2050"
                        value={selectedYear}
                        onChange={e => setSelectedYear(e.target.value)}

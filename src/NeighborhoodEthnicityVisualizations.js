@@ -1,6 +1,6 @@
 import React from 'react';
 
-const NeighborhoodVisualizations = ({data}) => {
+const NeighborhoodEthnicityVisualizations = ({data}) => {
         const ethnicityColorMapping = {
             white_all: '#A72608', // Red
             black_all: '#566C2C', // Light green
@@ -77,4 +77,4 @@ const NeighborhoodVisualizations = ({data}) => {
 ;
 
 
-export default NeighborhoodVisualizations;
+export default NeighborhoodEthnicityVisualizations;

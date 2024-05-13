@@ -8,13 +8,13 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 import './map.css';
 import HoverBox from "./hoverBox";
 
-export default function Map({ onNeighborhoodHover, ethnicityColorMapping,selectedEthnicity,setSelectedEthnicity, selectedYear ,setSelectedYear}) {
+export default function Map({ scenarioColorMapping,onNeighborhoodHover,selectedEthnicity,setSelectedEthnicity, selectedYear, selectedState}) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [geojsonData, setGeojsonData] = useState(null);
     const [csvData, setCsvData] = useState(null);
     const [specificYearData, setSpecificYearData] = useState(null);
-    const [zoom] = useState(12);
+    const [zoom] = useState(11);
     const [hoveredFeature, setHoveredFeature] = useState(null);
     const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
     const boston = {lng: -71.0589, lat: 42.3601};
@@ -41,11 +41,11 @@ export default function Map({ onNeighborhoodHover, ethnicityColorMapping,selecte
 
     useEffect(() => {
         if (csvData && csvData.length > 0) { // Ensure csvData is loaded and is not empty
-            const filteredData = csvData.filter(d => d.Year === String(selectedYear));
+            const filteredData = csvData.filter(d => d.Year === String(selectedYear) && d.Scenario ===selectedState);
             console.log("CSV", selectedYear, "Data:", filteredData);
             setSpecificYearData(filteredData);
         }
-    }, [csvData, selectedYear]);
+    }, [csvData, selectedYear, selectedState]);
 
 
     useEffect(() => {
@@ -125,15 +125,15 @@ export default function Map({ onNeighborhoodHover, ethnicityColorMapping,selecte
                     feature.id = feature.id || index;
                 });
                 setGeojsonData(data);
-                fetch('/data/all_data_2004_to_2050.csv')
+                fetch('/data/all_data_with_predictions.csv')
                     .then(response => response.text())
                     .then(csvText => {
                         const parsedCsvData = csvParse(csvText);
                         console.log("CSV Data:", parsedCsvData);
                         console.log("Geo Data:", data);
                         setCsvData(parsedCsvData);
-                        const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear));
-                        console.log("CSV 2020 Data:", filteredData);
+                        const filteredData = parsedCsvData.filter(d => d.Year === String(selectedYear) && d.Scenario ===selectedState);
+                        console.log("CSV 2025 Data:", filteredData);
                         setSpecificYearData(filteredData);
                     });
             });
@@ -145,11 +145,10 @@ export default function Map({ onNeighborhoodHover, ethnicityColorMapping,selecte
     };
     const addNeighborhoodsLayer = (selectedEthnicity, geojsonData, year2020Data) => {
         // Find min and max values for the selected ethnicity for proper scaling
-        const values = specificYearData.map(d => parseFloat(d[selectedEthnicity]));
-        const minValue = Math.min(...values);
-        const maxValue = Math.max(...values);
+        const minValue = 0;
+        const maxValue = 1;
 
-        const baseColor = ethnicityColorMapping[selectedEthnicity] || '#FFFFFF';
+        const baseColor = scenarioColorMapping[selectedState] || '#FFFFFF';
 
         geojsonData.features.forEach((feature, index) => {
             feature.id = feature.id || index;
@@ -276,7 +275,7 @@ export default function Map({ onNeighborhoodHover, ethnicityColorMapping,selecte
                 <option value="own_occ_rate">Ownership Occupation Rate</option>
             </select>
             <div ref={mapContainer} className="map"/>
-            <GradientBar color={ethnicityColorMapping[selectedEthnicity] || '#FFFFFF'}/>
+            <GradientBar color={scenarioColorMapping[selectedState] || '#FFFFFF'}/>
             <HoverBox
                 hoveredFeature={hoveredFeature}
                 mousePosition={mousePosition}
